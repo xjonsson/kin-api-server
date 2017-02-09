@@ -13,8 +13,22 @@ const _ = require('lodash');
 /* eslint-disable no-useless-escape */
 const SECRETS_MAPPING = {
 
-    // Express settings
+
+    /*
+     * Secret key used to encrypt the JWT token used for user authentication
+     * https://github.com/azuqua/jwt-redis-session#initialization
+     */
     EXPRESS_SECRET: '',
+
+
+    /*
+     * Paths your certificate's private key and chain.
+     *
+     * In Let's Encrypt (https://letsencrypt.org/) default setup, this will be
+     * something along those lines:
+     * HTTPS_KEY_FILE = /etc/letsencrypt/live/<YOUR_DOMAIN_NAME>/privkey.pem
+     * HTTPS_CERT_FILE = /etc/letsencrypt/live/<YOUR_DOMAIN_NAME>/fullchain.pem
+     */
     HTTPS_KEY_FILE: {
         dev: '',
         prod: '',
@@ -24,7 +38,11 @@ const SECRETS_MAPPING = {
         prod: '',
     },
 
-    // Eventbrite
+
+    /*
+     * Eventbrite OAuth app secrets
+     * https://www.eventbrite.com/myaccount/apps
+     */
     EVENTBRITE_CLIENT_ID: {
         dev: '',
         prod: '',
@@ -34,7 +52,11 @@ const SECRETS_MAPPING = {
         prod: '',
     },
 
-    // Facebook
+
+    /*
+     * Facebook OAuth app secrets
+     * https://developers.facebook.com/apps
+     */
     FACEBOOK_CLIENT_ID: {
         dev: '',
         prod: '',
@@ -44,7 +66,11 @@ const SECRETS_MAPPING = {
         prod: '',
     },
 
-    // Github
+
+    /*
+     * Github OAuth app secrets
+     * https://github.com/settings/developers
+     */
     GITHUB_CLIENT_ID: {
         dev: '',
         prod: '',
@@ -54,12 +80,20 @@ const SECRETS_MAPPING = {
         prod: '',
     },
 
-    // Google
+
+    /*
+     * Google OAuth app secrets
+     * https://console.developers.google.com/projectselector/apis/credentials
+     */
     GOOGLE_CLIENT_ID: '',
     GOOGLE_CLIENT_SECRET: '',
     GOOGLE_MAPS_KEY: '',
 
-    // Meetup
+
+    /*
+     * Meetup OAuth app secrets
+     * https://secure.meetup.com/meetup_api/oauth_consumers/
+     */
     MEETUP_CLIENT_ID: {
         dev: '',
         prod: '',
@@ -73,7 +107,11 @@ const SECRETS_MAPPING = {
         prod: '',
     },
 
-    // Outlook
+
+    /*
+     * Outlook/Office365 OAuth app secrets
+     * https://apps.dev.microsoft.com/
+     */
     OUTLOOK_CLIENT_ID: {
         prod: '',
         dev: '',
@@ -83,7 +121,11 @@ const SECRETS_MAPPING = {
         dev: '',
     },
 
-    // Todoist
+
+    /*
+     * Todoist OAuth app secrets
+     * https://developer.todoist.com/appconsole.html
+     */
     TODOIST_CLIENT_ID: {
         prod: '',
         dev: '',
@@ -93,11 +135,19 @@ const SECRETS_MAPPING = {
         dev: '',
     },
 
-    // Trello
+
+    /*
+     * Trello OAuth app secrets
+     * https://trello.com/app-key
+     */
     TRELLO_KEY: '',
     TRELLO_SECRET: '',
 
-    // Wunderlist
+
+    /*
+     * Wunderlist OAuth app secrets
+     * https://developer.wunderlist.com/apps
+     */
     WUNDERLIST_CLIENT_ID: {
         dev: '',
         prod: '',

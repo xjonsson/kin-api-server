@@ -11,15 +11,35 @@ const request = require('request-promise-native');
 const env = require('./env');
 
 
+/*
+ * host / ip that will be listened on
+ *
+ * e.g.:
+ *  dev: 127.0.0.1
+ *  prod: <ip used to reach the server>
+ */
 const API_HOST = {
     dev: '',
     prod: '',
 }[env];
+
+
+/*
+ * Local port on which the app will listen on.
+ *
+ * e.g: 8080
+ */
 const API_PORT = {
     dev: 0,
     prod: 0,
 }[env];
 
+
+/*
+ * Externally facing hostnames of your setup: API endpoint, static assets endpoint
+ *
+ * e.g: kin.today / static.kin.today
+ */
 const API_HOSTNAME = {
     dev: '',
     prod: '',
