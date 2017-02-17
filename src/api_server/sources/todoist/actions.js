@@ -15,6 +15,10 @@ const moment = require('moment-timezone');
 const _ = require('lodash');
 
 
+const TODOIST_DATE_TIME_FORMAT = 'ddd DD MMM YYYY HH:mm:ss ZZ';
+
+// TODO: Should be shared / accessible in utils
+// Kin's date formats
 const DATE_TIME_FORMAT = 'YYYY-MM-DDTHH:mm:ssZZ';
 const DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -69,14 +73,27 @@ function _format_event(layer_id, todoist_item) {
     // https://developer.todoist.com/#items
     // Input: Mon 07 Aug 2006 12:34:56 +0000
     // Format String: ddd
-    const parsed_due_date = moment(todoist_item.due_date_utc, 'ddd DD MMM YYYY HH:mm:ss ZZ', true);
+    const parsed_due_date = moment.tz(todoist_item.due_date_utc, TODOIST_DATE_TIME_FORMAT, true, 'UTC');
 
-    output.start = {
-        date: parsed_due_date.format('YYYY-MM-DD'),
-    };
-    output.end = {
-        date: parsed_due_date.add(1, 'day').format('YYYY-MM-DD'),
-    };
+    // FIXME: `all_day` is in all responses sent by Todoist now, but it's not documented
+    // https://developer.todoist.com/#items
+    // Need to contact Todoist folks about it
+    if (_.get(todoist_item, 'all_day', false)) {
+        output.start = {
+            date: parsed_due_date.format(DATE_FORMAT),
+        };
+        output.end = {
+            date: parsed_due_date.add(1, 'day').format(DATE_FORMAT),
+        };
+    } else {
+        output.start = {
+            date_time: parsed_due_date.format(DATE_TIME_FORMAT),
+        };
+        output.end = {
+            date_time: parsed_due_date.add(1, 'hour').format(DATE_TIME_FORMAT),
+        };
+    }
+
     return output;
 }
 
@@ -88,6 +105,7 @@ function _format_patch(event_patch) {
 
     if (!_.isEmpty(event_patch.start)) {
         let parsed_start = null;
+        let all_day = false;
 
         const date_time = _.get(event_patch, ['start', 'date_time'], null);
         if (!_.isNull(date_time)) {
@@ -99,6 +117,7 @@ function _format_patch(event_patch) {
             const date = _.get(event_patch, ['start', 'date'], null);
             if (!_.isNull(date)) {
                 parsed_start = moment.tz(date, DATE_FORMAT, true, 'utc');
+                all_day = true;
                 if (!parsed_start.isValid()) {
                     throw new errors.KinInvalidFormatError(date, 'start.date', DATE_FORMAT);
                 }
@@ -106,7 +125,11 @@ function _format_patch(event_patch) {
         }
 
         if (!_.isNull(parsed_start)) {
-            output.due_date_utc = parsed_start.format('YYYY-MM-DDTHH:mm');
+            if (all_day) {
+                output.due_date_utc = `${parsed_start.format('YYYY-MM-DD')}T23:59:59`;
+            } else {
+                output.due_date_utc = parsed_start.format('YYYY-MM-DDTHH:mm');
+            }
 
             // It seems I can put anything, as long as it's "set", due_date_utc will be used
             output.date_string = 'today';

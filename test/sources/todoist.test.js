@@ -114,22 +114,42 @@ describe('Todoist', function () {
                     .reply(200, {
                         items: [
                             {
-                                id: 112233,
-                                project_id: 1234,
+                                // Nominal
+                                all_day: false,
                                 content: 'Alpha',
                                 due_date_utc: 'Mon 10 Oct 2016 10:00:00 +0000',
+                                id: 112233,
+                                project_id: 1234,
                             },
                             {
-                                id: 445566,
-                                project_id: 1234,
+                                // No due date, should be filtered
                                 content: 'Beta',
                                 due_date_utc: null,
+                                id: 445566,
+                                project_id: 1234,
                             },
                             {
+                                // Wrong project, should be filtered
+                                content: 'Gamma',
+                                due_date_utc: 'Mon 10 Oct 2016 10:00:00 +0000',
                                 id: 778899,
                                 project_id: 5678,
-                                content: 'Gamma',
-                                due_date_utc: null,
+                            },
+                            {
+                                // All-day
+                                all_day: true,
+                                content: 'Delta',
+                                due_date_utc: 'Mon 10 Oct 2016 10:00:00 +0000',
+                                id: 101010,
+                                project_id: 1234,
+                            },
+                            {
+                                // FIXME: No `all-day` parameter as it's undocumented
+                                // by Todoist, should defaults to non all-day
+                                content: 'Epsilon',
+                                due_date_utc: 'Mon 10 Oct 2016 10:00:00 +0000',
+                                id: 111111,
+                                project_id: 1234,
                             },
                         ],
                     });
@@ -143,6 +163,18 @@ describe('Todoist', function () {
                             title: 'Alpha',
                             kind: 'event#basic',
                             start: {
+                                date_time: '2016-10-10T10:00:00+0000',
+                            },
+                            end: {
+                                date_time: '2016-10-10T11:00:00+0000',
+                            },
+                            link: 'https://en.todoist.com/app#project%2F1234',
+                        },
+                        {
+                            id: 'kin-1234:1234:101010',
+                            title: 'Delta',
+                            kind: 'event#basic',
+                            start: {
                                 date: '2016-10-10',
                             },
                             end: {
@@ -150,7 +182,18 @@ describe('Todoist', function () {
                             },
                             link: 'https://en.todoist.com/app#project%2F1234',
                         },
-                        // Beta and Gamma should not be there ;)
+                        {
+                            id: 'kin-1234:1234:111111',
+                            title: 'Epsilon',
+                            kind: 'event#basic',
+                            start: {
+                                date_time: '2016-10-10T10:00:00+0000',
+                            },
+                            end: {
+                                date_time: '2016-10-10T11:00:00+0000',
+                            },
+                            link: 'https://en.todoist.com/app#project%2F1234',
+                        },
                     ],
                 });
             });
@@ -165,22 +208,11 @@ describe('Todoist', function () {
                 this.stub_reply = {
                     items: [
                         {
-                            id: 112233,
-                            project_id: 1234,
+                            all_day: true,
                             content: 'Alpha',
                             due_date_utc: 'Mon 10 Oct 2016 10:00:00 +0000',
-                        },
-                        {
-                            id: 445566,
+                            id: 112233,
                             project_id: 1234,
-                            content: 'Beta',
-                            due_date_utc: null,
-                        },
-                        {
-                            id: 778899,
-                            project_id: 5678,
-                            content: 'Gamma',
-                            due_date_utc: null,
                         },
                     ],
                 };
@@ -250,7 +282,7 @@ describe('Todoist', function () {
                             type: 'item_update',
                             uuid: '#RealStringsHaveEntropy',
                             args: {
-                                due_date_utc: '2016-10-12T00:00',
+                                due_date_utc: '2016-10-12T23:59:59',
                                 date_string: 'today',
                                 id: '112233',
                             },
