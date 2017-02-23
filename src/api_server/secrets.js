@@ -22,7 +22,7 @@ const SECRETS_MAPPING = {
 
 
     /*
-     * Paths your certificate's private key and chain.
+     * Paths to your certificate's private key and chain.
      *
      * In Let's Encrypt (https://letsencrypt.org/) default setup, this will be
      * something along those lines:
@@ -40,21 +40,40 @@ const SECRETS_MAPPING = {
 
 
     /*
-     * Eventbrite OAuth app secrets
+     * After this, all secrets are related to specific providers (Google,
+     * Facebook ... ). You're not required to create an OAuth app for each one.
+     *
+     * Providers are disabled by default until you set values for their various
+     * secrets. You will be greeted by messages like this in the logs when
+     * starting the server for each unconfigured provider:
+     *     WARN could not load file auth.js for source github: TypeError:
+     *     OAuth2Strategy requires a clientID option
+     *     (in this case we have no client ID / client secret for Github)
+     *
+     * FIXME: that said, for now Facebook and Google qre required. They are used
+     * as an authentication mechanism to connect to Kin, and we haven't had time
+     * to make them bypassable if not configured.
+     */
+
+
+    /*
+     * Eventbrite OAuth app secrets (optional)
      * https://www.eventbrite.com/myaccount/apps
      */
     EVENTBRITE_CLIENT_ID: {
+        // Eventbrite "Application Key"
         dev: '',
         prod: '',
     },
     EVENTBRITE_CLIENT_SECRET: {
+        // Eventbrite "OAuth Client Secret"
         dev: '',
         prod: '',
     },
 
 
     /*
-     * Facebook OAuth app secrets
+     * Facebook OAuth app secrets (required)
      * https://developers.facebook.com/apps
      */
     FACEBOOK_CLIENT_ID: {
@@ -68,7 +87,7 @@ const SECRETS_MAPPING = {
 
 
     /*
-     * Github OAuth app secrets
+     * Github OAuth app secrets (optional)
      * https://github.com/settings/developers
      */
     GITHUB_CLIENT_ID: {
@@ -82,16 +101,21 @@ const SECRETS_MAPPING = {
 
 
     /*
-     * Google OAuth app secrets
+     * Google OAuth app secrets (required)
      * https://console.developers.google.com/projectselector/apis/credentials
      */
     GOOGLE_CLIENT_ID: '',
     GOOGLE_CLIENT_SECRET: '',
+
+    /*
+     * Google Static Map API key (optional)
+     * https://developers.google.com/maps/documentation/static-maps/
+     */
     GOOGLE_MAPS_KEY: '',
 
 
     /*
-     * Meetup OAuth app secrets
+     * Meetup OAuth app secrets (optional)
      * https://secure.meetup.com/meetup_api/oauth_consumers/
      */
     MEETUP_CLIENT_ID: {
@@ -99,6 +123,13 @@ const SECRETS_MAPPING = {
         prod: '',
     },
     MEETUP_CLIENT_INTERNAL_ID: {
+        // This is the internal ID of your app for Meetup, it's used for
+        // de-authing Kin when a user disconnect its Meetup account.
+        //
+        // Once you've created the OAuth App in Meetup's dashboard, click on
+        // "Edit Settings" and you'll be able to find the internal ID in the URL
+        // (labeled consumer_id):
+        //   https://secure.meetup.com/meetup_api/oauth_consumers/edit/?consumer_id=123456
         dev: '',
         prod: '',
     },
@@ -109,7 +140,7 @@ const SECRETS_MAPPING = {
 
 
     /*
-     * Outlook/Office365 OAuth app secrets
+     * Outlook/Office365 OAuth app secrets (optional)
      * https://apps.dev.microsoft.com/
      */
     OUTLOOK_CLIENT_ID: {
@@ -123,7 +154,7 @@ const SECRETS_MAPPING = {
 
 
     /*
-     * Todoist OAuth app secrets
+     * Todoist OAuth app secrets (optional)
      * https://developer.todoist.com/appconsole.html
      */
     TODOIST_CLIENT_ID: {
@@ -137,7 +168,7 @@ const SECRETS_MAPPING = {
 
 
     /*
-     * Trello OAuth app secrets
+     * Trello OAuth app secrets (optional)
      * https://trello.com/app-key
      */
     TRELLO_KEY: '',
@@ -145,7 +176,7 @@ const SECRETS_MAPPING = {
 
 
     /*
-     * Wunderlist OAuth app secrets
+     * Wunderlist OAuth app secrets (optional)
      * https://developer.wunderlist.com/apps
      */
     WUNDERLIST_CLIENT_ID: {
