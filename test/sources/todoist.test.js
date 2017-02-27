@@ -152,6 +152,7 @@ describe('Todoist', function () {
                                 project_id: 1234,
                             },
                         ],
+                        sync_token: 'nextSuperAwesomeSyncToken',
                     });
 
                 return expect(todoist_actions.load_events(
@@ -195,6 +196,47 @@ describe('Todoist', function () {
                             link: 'https://en.todoist.com/app#project%2F1234',
                         },
                     ],
+                    next_sync_token: 'nextSuperAwesomeSyncToken',
+                    sync_type: 'full',
+                });
+            });
+            it('eventually returns a set of events when providing a sync token', function () {
+                this.stubs.req.query.sync_token = 'superAwesomeSyncToken';
+                const layer_id = 'kin-1234:1234';
+                nock(TODOIST_API_BASE_URL)
+                    .post('/sync')
+                    .reply(200, {
+                        items: [
+                            {
+                                all_day: false,
+                                content: 'Alpha',
+                                due_date_utc: 'Mon 10 Oct 2016 10:00:00 +0000',
+                                id: 112233,
+                                project_id: 1234,
+                            },
+                        ],
+                        sync_token: 'nextSuperAwesomeSyncToken',
+                    });
+
+                return expect(todoist_actions.load_events(
+                    this.stubs.req, this.stubs.source, layer_id)  // eslint-disable-line comma-dangle
+                ).to.eventually.deep.equal({
+                    events: [
+                        {
+                            id: 'kin-1234:1234:112233',
+                            title: 'Alpha',
+                            kind: 'event#basic',
+                            start: {
+                                date_time: '2016-10-10T10:00:00+0000',
+                            },
+                            end: {
+                                date_time: '2016-10-10T11:00:00+0000',
+                            },
+                            link: 'https://en.todoist.com/app#project%2F1234',
+                        },
+                    ],
+                    next_sync_token: 'nextSuperAwesomeSyncToken',
+                    sync_type: 'incremental',
                 });
             });
         });

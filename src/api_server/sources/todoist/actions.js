@@ -16,6 +16,7 @@ const _ = require('lodash');
 
 
 const TODOIST_DATE_TIME_FORMAT = 'ddd DD MMM YYYY HH:mm:ss ZZ';
+const TODOIST_FULL_SYNC_TOKEN = '*';
 
 // TODO: Should be shared / accessible in utils
 // Kin's date formats
@@ -157,29 +158,39 @@ function load_layers(req, source) {
 }
 
 
-function load_events(req, source, layer_id) {
+function _load_events(req, source, layer_id, sync_token = TODOIST_FULL_SYNC_TOKEN) {
     const [, todoist_project_id] = split_merged_id(layer_id);
     const request_options = {
         form: {
             resource_types: JSON.stringify(['items']),
-            sync_token: '*',
+            sync_token,
         },
     };
+
+    const events_res = {
+        events: [],
+        sync_type: sync_token === TODOIST_FULL_SYNC_TOKEN ? 'full' : 'incremental',
+    };
+
     return new TodoistRequest(req, source.id)
         .api('sync', request_options)
         .then((todoist_res) => {
             const parsed_todoist_project_id = parseInt(todoist_project_id, 10);
-            const parsed_items = _(todoist_res.items)
+            events_res.events = _(todoist_res.items)
                 .filter((item) => {
                     return item.project_id === parsed_todoist_project_id
                         && !_.isNil(item.due_date_utc);
                 })
                 .map(_.partial(_format_event, layer_id))
                 .value();
-            return {
-                events: parsed_items,
-            };
+            events_res.next_sync_token = todoist_res.sync_token;
+            return events_res;
         });
+}
+
+
+function load_events(req, source, layer_id) {
+    return _load_events(req, source, layer_id, req.query.sync_token);
 }
 
 
