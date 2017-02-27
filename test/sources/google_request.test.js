@@ -114,7 +114,7 @@ describe('GoogleRequest', function () {
                 .to.be.rejectedWith(errors.KinDisconnectedSourceError);
         });
 
-        it('disconnects source when unauthorized (token is already being refreshed)', function () {
+        it('disconnects source when unauthorized - proper json response (token is already being refreshed)', function () {
             const stub_reply = {
                 error: {
                     errors: [
@@ -130,6 +130,26 @@ describe('GoogleRequest', function () {
                     message: 'Invalid Credentials',
                 },
             };
+            // TODO: add tests where we try to refresh token?
+            this.stubs.user.should_refresh.returns(bluebird.resolve(1));
+
+            nock(GCAL_API_BASE_URL)
+                .get('/test')
+                .times(3)
+                .reply(401, stub_reply);
+
+            const req_promise = new GoogleRequest(
+                this.stubs.req, this.stubs.source.id, GCAL_API_BASE_URL, {
+                    backoff_delay: 1,
+                    max_backoff_attempts: 3,
+                })
+                .api('test', {}, 0);
+            return expect(req_promise)
+                .to.be.rejectedWith(errors.KinDisconnectedSourceError);
+        });
+
+        it('disconnects source when unauthorized - html-gibberish response (token is already being refreshed)', function () {
+            const stub_reply = '<html><body><p><b>401.</b><ins>That&#39;s an error.</ins></p><p>There was an error in your request.<ins>That&#39;s all we know.</ins></p></body></html>';
             // TODO: add tests where we try to refresh token?
             this.stubs.user.should_refresh.returns(bluebird.resolve(1));
 

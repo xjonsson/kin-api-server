@@ -28,11 +28,7 @@ const GOOGLE_SCOPES = [
 
 
 function is_invalid_creds_error(err) {
-    const g_error = _.get(err, 'error.error');
-    if (!_.isUndefined(g_error)) {
-        return g_error.code === 401 && g_error.message === 'Invalid Credentials';
-    }
-    return false;
+    return err.statusCode === 401;
 }
 
 
