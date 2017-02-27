@@ -151,7 +151,7 @@ describe('Wunderlist', function () {
                 });
             });
 
-            it('eventually throws when the list is not found', function () {
+            it('eventually throws a `KinLayerNotFoundError` when the list is not found', function () {
                 const wunderlist_list_id = 'notFound';
                 const layer_id = `kin-1234:${wunderlist_list_id}`;
                 const stub_reply = {
@@ -159,6 +159,27 @@ describe('Wunderlist', function () {
                         type: 'not_found',
                         translation_key: 'api_error_not_found',
                         message: 'The resource you requested could not be found.',
+                    },
+                };
+                nock(WUNDERLIST_API_BASE_URL)
+                    .get('/tasks')
+                    .query(true)
+                    .reply(404, stub_reply);
+
+                return expect(wunderlist_actions.load_events(
+                    this.stubs.req, this.stubs.source, layer_id) // eslint-disable-line comma-dangle
+                ).to.be.rejectedWith(errors.KinLayerNotFoundError);
+            });
+
+            it('eventually throws a `KinLayerNotFoundError` when the user has restricted access to a list', function () {
+                const wunderlist_list_id = 'notFound';
+                const layer_id = `kin-1234:${wunderlist_list_id}`;
+                const stub_reply = {
+                    error: {
+                        type: 'permission_error',
+                        translation_key: 'api_error_permission_error',
+                        message: 'You\'ve not enough permissions.',
+                        permissions: 'failed',
                     },
                 };
                 nock(WUNDERLIST_API_BASE_URL)

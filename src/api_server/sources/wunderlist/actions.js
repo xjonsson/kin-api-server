@@ -128,11 +128,8 @@ function load_events(req, source, layer_id) {
             };
         })
         .catch((err) => {
-            const wunderlist_error = _.get(err, ['error', 'error']);
-            if (!_.isEmpty(wunderlist_error)) {
-                if (wunderlist_error.type === 'not_found') {
-                    throw new errors.KinLayerNotFoundError();
-                }
+            if (err.statusCode === 404) {
+                throw new errors.KinLayerNotFoundError();
             }
             throw err;
         });
