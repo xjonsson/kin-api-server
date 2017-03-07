@@ -71,6 +71,8 @@
   "scripts": {
     "build:dev": "NODE_ENV=dev gulp servers pm",
     "start": "pm2 start pm.json",
+    "test": "NODE_ENV=dev gulp test",
+    "test-watch": "NODE_ENV=dev gulp test-watch",
     "watch:dev": "NODE_ENV=dev gulp watch"
   }
 }
