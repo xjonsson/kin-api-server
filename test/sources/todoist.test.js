@@ -120,6 +120,7 @@ describe('Todoist', function () {
                                 due_date_utc: 'Mon 10 Oct 2016 10:00:00 +0000',
                                 id: 112233,
                                 project_id: 1234,
+                                in_history: 0,
                             },
                             {
                                 // No due date, should be filtered
@@ -127,6 +128,7 @@ describe('Todoist', function () {
                                 due_date_utc: null,
                                 id: 445566,
                                 project_id: 1234,
+                                in_history: 0,
                             },
                             {
                                 // Wrong project, should be filtered
@@ -134,6 +136,7 @@ describe('Todoist', function () {
                                 due_date_utc: 'Mon 10 Oct 2016 10:00:00 +0000',
                                 id: 778899,
                                 project_id: 5678,
+                                in_history: 0,
                             },
                             {
                                 // All-day
@@ -142,6 +145,7 @@ describe('Todoist', function () {
                                 due_date_utc: 'Mon 10 Oct 2016 10:00:00 +0000',
                                 id: 101010,
                                 project_id: 1234,
+                                in_history: 0,
                             },
                             {
                                 // FIXME: No `all-day` parameter as it's undocumented
@@ -150,6 +154,7 @@ describe('Todoist', function () {
                                 due_date_utc: 'Mon 10 Oct 2016 10:00:00 +0000',
                                 id: 111111,
                                 project_id: 1234,
+                                in_history: 0,
                             },
                         ],
                         sync_token: 'nextSuperAwesomeSyncToken',
@@ -170,6 +175,7 @@ describe('Todoist', function () {
                                 date_time: '2016-10-10T11:00:00+0000',
                             },
                             link: 'https://en.todoist.com/app#project%2F1234',
+                            status: 'confirmed',
                         },
                         {
                             id: 'kin-1234:1234:101010',
@@ -182,6 +188,7 @@ describe('Todoist', function () {
                                 date: '2016-10-11',
                             },
                             link: 'https://en.todoist.com/app#project%2F1234',
+                            status: 'confirmed',
                         },
                         {
                             id: 'kin-1234:1234:111111',
@@ -194,6 +201,7 @@ describe('Todoist', function () {
                                 date_time: '2016-10-10T11:00:00+0000',
                             },
                             link: 'https://en.todoist.com/app#project%2F1234',
+                            status: 'confirmed',
                         },
                     ],
                     next_sync_token: 'nextSuperAwesomeSyncToken',
@@ -213,6 +221,16 @@ describe('Todoist', function () {
                                 due_date_utc: 'Mon 10 Oct 2016 10:00:00 +0000',
                                 id: 112233,
                                 project_id: 1234,
+                                in_history: 0,
+                            },
+                            {
+                                // Item is marked as completed
+                                all_day: false,
+                                content: 'Beta',
+                                due_date_utc: 'Mon 11 Oct 2016 10:00:00 +0000',
+                                id: 445566,
+                                project_id: 1234,
+                                in_history: 1,
                             },
                         ],
                         sync_token: 'nextSuperAwesomeSyncToken',
@@ -233,6 +251,20 @@ describe('Todoist', function () {
                                 date_time: '2016-10-10T11:00:00+0000',
                             },
                             link: 'https://en.todoist.com/app#project%2F1234',
+                            status: 'confirmed',
+                        },
+                        {
+                            id: 'kin-1234:1234:445566',
+                            title: 'Beta',
+                            kind: 'event#basic',
+                            start: {
+                                date_time: '2016-10-11T10:00:00+0000',
+                            },
+                            end: {
+                                date_time: '2016-10-11T11:00:00+0000',
+                            },
+                            link: 'https://en.todoist.com/app#project%2F1234',
+                            status: 'cancelled',
                         },
                     ],
                     next_sync_token: 'nextSuperAwesomeSyncToken',
@@ -255,6 +287,7 @@ describe('Todoist', function () {
                             due_date_utc: 'Mon 10 Oct 2016 10:00:00 +0000',
                             id: 112233,
                             project_id: 1234,
+                            in_history: 0,
                         },
                     ],
                 };
@@ -269,6 +302,7 @@ describe('Todoist', function () {
                     },
                     kind: 'event#basic',
                     link: 'https://en.todoist.com/app#project%2F1234',
+                    status: 'confirmed',
                 };
             });
 

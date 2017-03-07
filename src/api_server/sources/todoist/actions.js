@@ -95,6 +95,8 @@ function _format_event(layer_id, todoist_item) {
         };
     }
 
+    output.status = todoist_item.in_history === 1 ? 'cancelled' : 'confirmed';
+
     return output;
 }
 
