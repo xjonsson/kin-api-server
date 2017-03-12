@@ -81,6 +81,7 @@ const rp = request.defaults({
     pool: {
         maxSockets: Infinity,
     },
+    gzip: true,
 });
 
 
