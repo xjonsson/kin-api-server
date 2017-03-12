@@ -27,6 +27,10 @@ class GithubRequest extends KinRequest {
         super(req, source_id, GITHUB_API_BASE_URL);
     }
 
+    get source_name() {
+        return 'github';
+    }
+
     api(uri, options = {}, attempt = 0) {
         return super
             .api(uri, options, attempt)

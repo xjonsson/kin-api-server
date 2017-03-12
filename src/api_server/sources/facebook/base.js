@@ -58,6 +58,10 @@ class FacebookRequest extends KinRequest {
         super(req, source_id, FACEBOOK_API_BASE_URL);
     }
 
+    get source_name() {
+        return 'facebook';
+    }
+
     api(uri, options = {}, attempt = 0) {
         return super
             .api(uri, options, attempt)

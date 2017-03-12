@@ -30,6 +30,10 @@ class WunderlistRequest extends KinRequest {
         super(req, source_id, WUNDERLIST_API_BASE_URL);
     }
 
+    get source_name() {
+        return 'wunderlist';
+    }
+
     api(uri, options = {}, attempt = 0) {
         return super
             .api(uri, options, attempt)

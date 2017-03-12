@@ -33,6 +33,10 @@ class MeetupRequest extends KinRequest {
         }, options));
     }
 
+    get source_name() {
+        return 'meetup';
+    }
+
     api(uri, options = {}, attempt = 0) {
         return super
             .api(uri, options, attempt)

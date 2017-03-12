@@ -31,6 +31,10 @@ class TrelloRequest extends KinRequest {
         super(req, source_id, TRELLO_API_BASE_URL);
     }
 
+    get source_name() {
+        return 'trello';
+    }
+
     api(uri, options = {}, attempt = 0) {
         return super
             .api(uri, options, attempt)
