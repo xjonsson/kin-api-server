@@ -8,7 +8,6 @@
 const KinRequest = require('../kin_request');
 const { logger, rp } = require('../../config');
 const secrets = require('../../secrets');
-const { disconnect_source } = require('../../utils');
 
 const _ = require('lodash');
 
@@ -27,11 +26,6 @@ const GOOGLE_SCOPES = [
 ];
 
 
-function is_invalid_creds_error(err) {
-    return err.statusCode === 401;
-}
-
-
 class GoogleRequest extends KinRequest {
     constructor(req, source_id, base = GCAL_API_BASE_URL, options = {}) {
         super(req, source_id, base, _.merge({
@@ -41,18 +35,6 @@ class GoogleRequest extends KinRequest {
 
     get source_name() {
         return 'google';
-    }
-
-    api(uri, options = {}, attempt = 0) {
-        return super
-            .api(uri, options, attempt)
-            .catch((err) => {
-                if (is_invalid_creds_error(err)) {
-                    disconnect_source(this._req, this._source, err);
-                } else {
-                    throw err;
-                }
-            });
     }
 
     refresh_token() {

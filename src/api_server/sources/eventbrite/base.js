@@ -7,23 +7,11 @@
 
 const KinRequest = require('../kin_request');
 
-const { disconnect_source } = require('../../utils');
-
 const _ = require('lodash');
 
 
 const EVENTBRITE_API_BASE_URL = 'https://www.eventbriteapi.com/v3/';
 const EVENTBRITE_API_TIMEOUT = 8 * 1000;
-
-
-function is_invalid_creds_error(err) {
-    const eventbrite_error = _.get(err, 'error');
-    if (!_.isEmpty(eventbrite_error)) {
-        // TODO: check on `error` status string as well?
-        return eventbrite_error.status_code === 401;
-    }
-    return false;
-}
 
 
 class EventbriteRequest extends KinRequest {
@@ -35,16 +23,13 @@ class EventbriteRequest extends KinRequest {
         return 'eventbrite';
     }
 
-    api(uri, options = {}, attempt = 0) {
-        return super
-            .api(uri, options, attempt)
-            .catch((err) => {
-                if (is_invalid_creds_error(err)) {
-                    disconnect_source(this._req, this._source, err);
-                } else {
-                    throw err;
-                }
-            });
+    is_invalid_creds_error(err) {
+        const eventbrite_error = _.get(err, 'error');
+        if (!_.isEmpty(eventbrite_error)) {
+            // TODO: check on `error` status string as well?
+            return eventbrite_error.status_code === 401;
+        }
+        return false;
     }
 
     api_request_options(access_token, overrides) {

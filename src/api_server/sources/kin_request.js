@@ -6,6 +6,7 @@
 
 
 const { logger, rp } = require('../config');
+const { disconnect_source } = require('../utils');
 
 
 const bluebird = require('bluebird');
@@ -44,6 +45,10 @@ class KinRequest {
         return b;
     }
 
+    is_invalid_creds_error(err) {
+        return err.statusCode === 401;
+    }
+
     api(uri, options = {}, attempt = 0) {
         options.uri = this._base + uri; // eslint-disable-line no-param-reassign
         const merged_options = this.api_request_options(this._source.access_token, options);
@@ -70,6 +75,13 @@ class KinRequest {
                 }
 
                 throw err;
+            })
+            .catch((err) => {
+                if (this.is_invalid_creds_error(err)) {
+                    disconnect_source(this._req, this._source, err);
+                } else {
+                    throw err;
+                }
             });
     }
 
