@@ -167,5 +167,22 @@ describe('GoogleRequest', function () {
             return expect(req_promise)
                 .to.be.rejectedWith(errors.KinDisconnectedSourceError);
         });
+
+        it('disconnects source when refresh token has been revoked', function () {
+            const stub_reply = {
+                error: 'invalid_grant',
+                error_description: 'Token has been expired or revoked.',
+            };
+
+            nock(GCAL_API_BASE_URL)
+                .get('/test')
+                .reply(400, stub_reply);
+
+            const req_promise = new GoogleRequest(
+                this.stubs.req, this.stubs.source.id, GCAL_API_BASE_URL)
+                .api('test', {}, 0);
+            return expect(req_promise)
+                .to.be.rejectedWith(errors.KinDisconnectedSourceError);
+        });
     });
 });

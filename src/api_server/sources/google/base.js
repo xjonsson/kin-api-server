@@ -37,6 +37,16 @@ class GoogleRequest extends KinRequest {
         return 'google';
     }
 
+    is_invalid_creds_error(err) {
+        return (
+            err.statusCode === 401
+            || (
+                err.statusCode === 400
+                && _.get(err, ['error', 'error']) === 'invalid_grant'
+            )
+        );
+    }
+
     refresh_token() {
         logger.debug('%s refreshing token for user `%s` and source `%s`',
                      this._req.id, this._user.id, this._source_id);
