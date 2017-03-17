@@ -60,6 +60,11 @@ class User {
         this._deleted_sources_id = new Set();
     }
 
+    static get_alias(user_id) {
+        return redis_clients.main.hgetall(_misc_key(user_id))
+            .then(misc => _.get(misc, 'alias', user_id));
+    }
+
     static load(user_id) {
         const promises = [
             redis_clients.main.hgetall(_misc_key(user_id)),

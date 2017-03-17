@@ -64,9 +64,12 @@ function _create_user(access_token, refresh_token, profile) {
 
 function save_token(req, access_token, refresh_token, profile, done) {
     const source_id = get_source_id(profile.provider, profile.id);
-    User.load(source_id)
+    User.get_alias(source_id)
+        .then(User.load)
         .catch(errors.KinUnauthenticatedUser, () => {
-            return _create_user(access_token, refresh_token, profile);
+            const user = _create_user(access_token, refresh_token, profile);
+            logger.debug(`${req.id} created new user \`${user.id}\``);
+            return user;
         })
         .then((user) => {
             req.user = user; // eslint-disable-line no-param-reassign
