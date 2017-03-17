@@ -7,24 +7,20 @@
 
 const { STATIC_HOSTNAME, logger } = require('../config');
 const { FACEBOOK_SCOPES } = require('../sources/facebook/base');
-const { GOOGLE_SCOPES, load_google_colors } = require('../sources/google/base');
+const { GOOGLE_SCOPES } = require('../sources/google/base');
 
 const errors = require('../errors');
-const { autoload_all_selected_layers } = require('../sources/source');
+const { save_source } = require('../sources/source');
 const secrets = require('../secrets');
 const User = require('../user');
-const { create_source, ensured_logged_in,
-       get_callback_url, get_ios_url,
-       get_source_id, get_static_url } = require('../utils');
+const { ensured_logged_in, get_callback_url, get_ios_url,
+    get_source_id, get_static_url } = require('../utils');
 
 
-const bluebird = require('bluebird');
 const express = require('express');
-const moment = require('moment-timezone');
 const passport = require('passport');
 const FacebookStrategy = require('passport-facebook').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const _ = require('lodash');
 
 
 const router = express.Router(); // eslint-disable-line new-cap
@@ -34,7 +30,7 @@ const authentication_urls = {
 };
 
 
-function end_authentication(req, res) {
+function end_authentication(req, res, next) {
     req.session.user = req.user.id; // eslint-disable-line no-param-reassign
 
     const claims = {
@@ -51,54 +47,33 @@ function end_authentication(req, res) {
             ios_redirect: ios_redirect_url,
             token,
         });
+
+        next();
     });
+}
+
+
+function _create_user(access_token, refresh_token, profile) {
+    const source_id = get_source_id(profile.provider, profile.id);
+    const user = new User(source_id, {
+        display_name: profile.displayName
+    });
+    return user;
 }
 
 
 function save_token(req, access_token, refresh_token, profile, done) {
     const source_id = get_source_id(profile.provider, profile.id);
-    const get_or_create_user = User.load(source_id)
-        .catch((err) => {
-            if (err instanceof errors.KinUnauthenticatedUser) {
-                const source = create_source(profile, { access_token, refresh_token });
-
-                const user = new User(source_id, {
-                    display_name: profile.displayName
-                });
-                req.user = user; // eslint-disable-line no-param-reassign
-                user.add_source(source);
-
-                const promises = [
-                    autoload_all_selected_layers(req, source),
-                ];
-                if (profile.provider === 'google') {
-                    promises.push(load_google_colors(req, source));
-                }
-
-                return bluebird
-                    .all(promises)
-                    .then(() => {
-                        return user;
-                    });
-            }
-            throw err;
+    User.load(source_id)
+        .catch(errors.KinUnauthenticatedUser, () => {
+            return _create_user(access_token, refresh_token, profile);
         })
         .then((user) => {
-            const source = create_source(profile, { access_token, refresh_token });
-            const prev_source = user.get_source(source.id);
             req.user = user; // eslint-disable-line no-param-reassign
-            user.add_source(_.merge(prev_source, source));
-            return bluebird.resolve(user);
-        });
-    get_or_create_user
-        .then(user => user.save(moment().unix()))
-        .then(() => {
-            const user = get_or_create_user.value();
-            logger.debug('%s saved dirty user `%s`', req.id, user.id);
-            return done(null, user);
+            save_source(req, access_token, refresh_token, profile, done);
         })
         .catch((err) => {
-            logger.error('%s \n', req.id, err);
+            logger.error(`${req.id} \n ${err}`);
             done(err, null);
         });
 }
