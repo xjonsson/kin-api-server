@@ -43,10 +43,12 @@ describe('KiNRequest', function () {
             // - Setting setTimeout to setImmediate will trigger request'
             //   timeout before hitting the socket timeout, not good
             const _setTimeout = setTimeout;
-            this.sandbox = sinon.sandbox.create();
-            this.sandbox.stub(global, 'setTimeout', (func, delay) => {
+            function _fast_set_timeout(func, delay) {
                 _setTimeout(func, delay / 100);
-            });
+            }
+
+            this.sandbox = sinon.sandbox.create();
+            this.sandbox.stub(global, 'setTimeout').callsFake(_fast_set_timeout);
         });
 
         after(function () {

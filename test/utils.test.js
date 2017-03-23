@@ -7,7 +7,7 @@
 
 const bluebird = require('bluebird');
 const chai = require('chai');
-const proxyquire = require('proxyquire');
+const proxyquire = require('proxyquire').noCallThru();
 const sinon = require('sinon');
 const sinon_chai = require('sinon-chai');
 
@@ -32,7 +32,7 @@ chai.use(sinon_chai);
 
 describe('utlis', function () {
     beforeEach(function () {
-        user_stub.load.reset();
+        user_stub.load.resetHistory();
         this.next_spy = sinon.spy();
     });
 

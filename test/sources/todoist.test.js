@@ -8,7 +8,7 @@
 const chai = require('chai');
 const chai_as_promised = require('chai-as-promised');
 const nock = require('nock');
-const proxyquire = require('proxyquire');
+const proxyquire = require('proxyquire').noCallThru();
 const sinon = require('sinon');
 const sinon_chai = require('sinon-chai');
 const _ = require('lodash');
@@ -31,7 +31,7 @@ chai.use(sinon_chai);
 describe('Todoist', function () {
     beforeEach(function () {
         this.stubs = create_stubs();
-        cuid_stub.reset();
+        cuid_stub.resetHistory();
     });
 
     describe('request', function () {

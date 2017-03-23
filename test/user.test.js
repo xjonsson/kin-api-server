@@ -62,6 +62,16 @@ const User = proxyquire('../src/api_server/user', {
 describe('user', function () {
     beforeEach(function () {
         this.user = new User('bk-1234', stub_user_misc);
+
+        redis_client_stub.hdel.resetHistory();
+        redis_client_stub.hgetall.resetHistory();
+        redis_client_stub.hmset.resetHistory();
+
+        // FIXME: Waiting on Sinon's fixing this issue:
+        // https://github.com/sinonjs/sinon/issues/1361
+        redis_client_stub.hgetall
+            .withArgs('bk-1234:misc')
+            .returns(bluebird.resolve(stub_user_misc));
     });
 
     afterEach(function () {
@@ -215,12 +225,6 @@ describe('user', function () {
     });
 
     describe('#save', function () {
-        beforeEach(function () {
-            redis_client_stub.hdel.reset();
-            redis_client_stub.hgetall.reset();
-            redis_client_stub.hmset.reset();
-        });
-
         it('eventually set dirty to false', function () {
             return expect(this.user.save())
                 .to.be.fulfilled
