@@ -98,7 +98,7 @@ _.forEach(auth_routers, (auth_router, source_name) => {
     app.use(`/${API_VERSION}/source/${source_name}`, auth_router);
 });
 
-app.use((err, req, res, next) => {
+function app_error_handler(err, req, res, next) {
     if (err instanceof errors.KinError) {
         if (err.status_code >= 500) {
             logger.error('%s\n', req.id, err);
@@ -117,9 +117,16 @@ app.use((err, req, res, next) => {
         });
     }
     next();
-});
+}
+
+app.use(app_error_handler);
 app.use(save_dirty_user);
 
+app.all('*', (req, res, next) => {
+    if (!res.headersSent) {
+        app_error_handler(new errors.KinRouteNotFound(), req, res, next);
+    }
+});
 
 const https_options = {
     key: fs.readFileSync(secrets.get('HTTPS_KEY_FILE')),

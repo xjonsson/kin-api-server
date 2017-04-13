@@ -147,6 +147,16 @@ class KinLayerNotFoundError extends KinError {
 }
 
 
+class KinRouteNotFound extends KinError {
+    constructor() {
+        super('route not found');
+        this.name = this.constructor.name;
+    }
+
+    get status_code() { return 404; }
+    get code() { return 100; }
+}
+
 module.exports = {
     KinError,
     KinDisconnectedSourceError,
@@ -159,5 +169,6 @@ module.exports = {
     KinInvalidFormatError,
     KinTimeRangeEmptyError,
     KinLimitError,
+    KinRouteNotFound,
 };
 /* eslint-enable class-methods-use-this */
