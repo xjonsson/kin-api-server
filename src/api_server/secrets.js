@@ -50,7 +50,7 @@ const SECRETS_MAPPING = {
      *     OAuth2Strategy requires a clientID option
      *     (in this case we have no client ID / client secret for Github)
      *
-     * FIXME: that said, for now Facebook and Google qre required. They are used
+     * FIXME: that said, for now Facebook and Google are required. They are used
      * as an authentication mechanism to connect to Kin, and we haven't had time
      * to make them bypassable if not configured.
      */
