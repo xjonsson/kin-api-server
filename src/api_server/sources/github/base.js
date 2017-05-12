@@ -4,18 +4,13 @@
  * Apache 2.0 Licensed
  */
 
+const KinRequest = require("../kin_request");
 
-const KinRequest = require('../kin_request');
+const _ = require("lodash");
 
-const _ = require('lodash');
-
-
-const GITHUB_API_BASE_URL = 'https://api.github.com/';
+const GITHUB_API_BASE_URL = "https://api.github.com/";
 const GITHUB_API_TIMEOUT = 4 * 1000;
-const GITHUB_SCOPES = [
-    'repo',
-];
-
+const GITHUB_SCOPES = ["repo"];
 
 class GithubRequest extends KinRequest {
     constructor(req, source_id) {
@@ -23,26 +18,28 @@ class GithubRequest extends KinRequest {
     }
 
     get source_name() {
-        return 'github';
+        return "github";
     }
 
     api_request_options(access_token, overrides) {
-        return _.merge({
-            headers: {
-                Authorization: `token ${access_token}`,
-                'User-Agent': 'Kin Calendar',
+        return _.merge(
+            {
+                headers: {
+                    Authorization: `token ${access_token}`,
+                    "User-Agent": "Kin Calendar"
+                },
+                json: true,
+                timeout: GITHUB_API_TIMEOUT
             },
-            json: true,
-            timeout: GITHUB_API_TIMEOUT,
-        }, overrides);
+            overrides
+        );
     }
 }
-
 
 module.exports = {
     GITHUB_API_BASE_URL,
     GITHUB_API_TIMEOUT,
     GITHUB_SCOPES,
 
-    GithubRequest,
+    GithubRequest
 };

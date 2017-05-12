@@ -4,19 +4,16 @@
  * Apache 2.0 Licensed
  */
 
-
-const dnscache = require('dnscache');
-
+const dnscache = require("dnscache");
 
 function setup() {
     dnscache({
         enable: true,
         ttl: 300,
-        cachesize: 1000,
+        cachesize: 1000
     });
 }
 
-
 module.exports = {
-    setup,
+    setup
 };

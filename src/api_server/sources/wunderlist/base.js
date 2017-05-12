@@ -4,17 +4,14 @@
  * Apache 2.0 Licensed
  */
 
+const KinRequest = require("../kin_request");
+const secrets = require("../../secrets");
 
-const KinRequest = require('../kin_request');
-const secrets = require('../../secrets');
+const _ = require("lodash");
 
-const _ = require('lodash');
-
-
-const WUNDERLIST_API_BASE_URL = 'https://a.wunderlist.com/api/v1/';
+const WUNDERLIST_API_BASE_URL = "https://a.wunderlist.com/api/v1/";
 const WUNDERLIST_API_TIMEOUT = 4 * 1000;
 const WUNDERLIST_SCOPES = [];
-
 
 class WunderlistRequest extends KinRequest {
     constructor(req, source_id) {
@@ -22,26 +19,29 @@ class WunderlistRequest extends KinRequest {
     }
 
     get source_name() {
-        return 'wunderlist';
+        return "wunderlist";
     }
 
     is_invalid_creds_error(err) {
-        const wunderlist_error = _.get(err, ['error', 'error']);
+        const wunderlist_error = _.get(err, ["error", "error"]);
         if (!_.isEmpty(wunderlist_error)) {
-            return wunderlist_error.type === 'unauthorized';
+            return wunderlist_error.type === "unauthorized";
         }
         return false;
     }
 
     api_request_options(access_token, overrides) {
-        return _.merge({
-            headers: {
-                'X-Client-ID': secrets.get('WUNDERLIST_CLIENT_ID'),
-                'X-Access-Token': access_token,
+        return _.merge(
+            {
+                headers: {
+                    "X-Client-ID": secrets.get("WUNDERLIST_CLIENT_ID"),
+                    "X-Access-Token": access_token
+                },
+                json: true,
+                timeout: WUNDERLIST_API_TIMEOUT
             },
-            json: true,
-            timeout: WUNDERLIST_API_TIMEOUT,
-        }, overrides);
+            overrides
+        );
     }
 }
 
@@ -50,5 +50,5 @@ module.exports = {
     WUNDERLIST_API_TIMEOUT,
     WUNDERLIST_SCOPES,
 
-    WunderlistRequest,
+    WunderlistRequest
 };

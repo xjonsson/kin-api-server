@@ -4,50 +4,45 @@
  * Apache 2.0 Licensed
  */
 
+const { deauth_source, save_source, send_home_redirects } = require("../source");
+const { logger } = require("../../config");
+const secrets = require("../../secrets");
+const { ensured_logged_in, get_callback_url, get_static_url } = require("../../utils");
 
-const { deauth_source, save_source, send_home_redirects } = require('../source');
-const { logger } = require('../../config');
-const secrets = require('../../secrets');
-const { ensured_logged_in, get_callback_url, get_static_url } = require('../../utils');
-
-
-const express = require('express');
-const EventbriteStrategy = require('passport-eventbrite-oauth').Strategy;
-const passport = require('passport');
-const _ = require('lodash');
-
+const express = require("express");
+const EventbriteStrategy = require("passport-eventbrite-oauth").Strategy;
+const passport = require("passport");
+const _ = require("lodash");
 
 const router = express.Router(); // eslint-disable-line new-cap
-const source_redirect_url = get_callback_url('eventbrite');
+const source_redirect_url = get_callback_url("eventbrite");
 
-
-passport.use('eventbrite-source', new EventbriteStrategy({
-    clientID: secrets.get('EVENTBRITE_CLIENT_ID'),
-    clientSecret: secrets.get('EVENTBRITE_CLIENT_SECRET'),
-    callbackURL: source_redirect_url,
-    passReqToCallback: true,
-}, save_source));
-
-
-router.get(
-    '/',
-    ensured_logged_in,
-    passport.authorize('eventbrite-source')
+passport.use(
+    "eventbrite-source",
+    new EventbriteStrategy(
+        {
+            clientID: secrets.get("EVENTBRITE_CLIENT_ID"),
+            clientSecret: secrets.get("EVENTBRITE_CLIENT_SECRET"),
+            callbackURL: source_redirect_url,
+            passReqToCallback: true
+        },
+        save_source
+    )
 );
 
+router.get("/", ensured_logged_in, passport.authorize("eventbrite-source"));
 
 router.get(
-    '/callback',
+    "/callback",
     ensured_logged_in,
-    passport.authorize('eventbrite-source', {
-        failureRedirect: get_static_url(),
+    passport.authorize("eventbrite-source", {
+        failureRedirect: get_static_url()
     }),
     send_home_redirects
 );
 
-
 router.get(
-    '/deauth/:source_id*',
+    "/deauth/:source_id*",
     ensured_logged_in,
     (req, res, next) => {
         const source_id = req.params.source_id;
@@ -56,20 +51,18 @@ router.get(
         const source = user.get_source(source_id);
         if (_.isUndefined(source)) {
             res.status(404).json({
-                msg: `bad source id: \`${source_id}\``,
+                msg: `bad source id: \`${source_id}\``
             });
         } else {
             // TODO: need to ask the user to go to eventbrite to revoke the app
             deauth_source(req, source);
-            logger.debug('%s revoked source `%s` for user `%s`',
-                         req.id, source_id, user.id);
+            logger.debug("%s revoked source `%s` for user `%s`", req.id, source_id, user.id);
         }
         next();
     },
     send_home_redirects
 );
 
-
 module.exports = {
-    router,
+    router
 };

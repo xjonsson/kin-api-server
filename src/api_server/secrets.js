@@ -4,22 +4,17 @@
  * Apache 2.0 Licensed
  */
 
+const env = require("./env");
 
-const env = require('./env');
-
-const _ = require('lodash');
-
+const _ = require("lodash");
 
 /* eslint-disable no-useless-escape */
 const SECRETS_MAPPING = {
-
-
     /*
      * Secret key used to encrypt the JWT token used for user authentication
      * https://github.com/azuqua/jwt-redis-session#initialization
      */
-    EXPRESS_SECRET: '',
-
+    EXPRESS_SECRET: "",
 
     /*
      * Paths to your certificate's private key and chain.
@@ -30,14 +25,13 @@ const SECRETS_MAPPING = {
      * HTTPS_CERT_FILE = /etc/letsencrypt/live/<YOUR_DOMAIN_NAME>/fullchain.pem
      */
     HTTPS_KEY_FILE: {
-        dev: '',
-        prod: '',
+        dev: "",
+        prod: ""
     },
     HTTPS_CERT_FILE: {
-        dev: '',
-        prod: '',
+        dev: "",
+        prod: ""
     },
-
 
     /*
      * After this, all secrets are related to specific providers (Google,
@@ -55,72 +49,67 @@ const SECRETS_MAPPING = {
      * to make them bypassable if not configured.
      */
 
-
     /*
      * Eventbrite OAuth app secrets (optional)
      * https://www.eventbrite.com/myaccount/apps
      */
     EVENTBRITE_CLIENT_ID: {
         // Eventbrite "Application Key"
-        dev: '',
-        prod: '',
+        dev: "",
+        prod: ""
     },
     EVENTBRITE_CLIENT_SECRET: {
         // Eventbrite "OAuth Client Secret"
-        dev: '',
-        prod: '',
+        dev: "",
+        prod: ""
     },
-
 
     /*
      * Facebook OAuth app secrets (required)
      * https://developers.facebook.com/apps
      */
     FACEBOOK_CLIENT_ID: {
-        dev: '',
-        prod: '',
+        dev: "",
+        prod: ""
     },
     FACEBOOK_CLIENT_SECRET: {
-        dev: '',
-        prod: '',
+        dev: "",
+        prod: ""
     },
-
 
     /*
      * Github OAuth app secrets (optional)
      * https://github.com/settings/developers
      */
     GITHUB_CLIENT_ID: {
-        dev: '',
-        prod: '',
+        dev: "",
+        prod: ""
     },
     GITHUB_CLIENT_SECRET: {
-        dev: '',
-        prod: '',
+        dev: "",
+        prod: ""
     },
-
 
     /*
      * Google OAuth app secrets (required)
      * https://console.developers.google.com/projectselector/apis/credentials
      */
-    GOOGLE_CLIENT_ID: '',
-    GOOGLE_CLIENT_SECRET: '',
+    GOOGLE_CLIENT_ID: "",
+    GOOGLE_CLIENT_SECRET: "",
 
     /*
      * Google Static Map API key (optional)
      * https://developers.google.com/maps/documentation/static-maps/
      */
-    GOOGLE_MAPS_KEY: '',
-
+    GOOGLE_MAPS_KEY: "",
 
     /*
      * Meetup OAuth app secrets (optional)
      * https://secure.meetup.com/meetup_api/oauth_consumers/
      */
     MEETUP_CLIENT_ID: {
-        dev: '',
-        prod: '',
+        dev: "",
+        prod: ""
     },
     MEETUP_CLIENT_INTERNAL_ID: {
         // This is the internal ID of your app for Meetup, it's used for
@@ -130,71 +119,66 @@ const SECRETS_MAPPING = {
         // "Edit Settings" and you'll be able to find the internal ID in the URL
         // (labeled consumer_id):
         //   https://secure.meetup.com/meetup_api/oauth_consumers/edit/?consumer_id=123456
-        dev: '',
-        prod: '',
+        dev: "",
+        prod: ""
     },
     MEETUP_CLIENT_SECRET: {
-        dev: '',
-        prod: '',
+        dev: "",
+        prod: ""
     },
-
 
     /*
      * Outlook/Office365 OAuth app secrets (optional)
      * https://apps.dev.microsoft.com/
      */
     OUTLOOK_CLIENT_ID: {
-        prod: '',
-        dev: '',
+        prod: "",
+        dev: ""
     },
     OUTLOOK_CLIENT_SECRET: {
-        prod: '',
-        dev: '',
+        prod: "",
+        dev: ""
     },
-
 
     /*
      * Todoist OAuth app secrets (optional)
      * https://developer.todoist.com/appconsole.html
      */
     TODOIST_CLIENT_ID: {
-        prod: '',
-        dev: '',
+        prod: "",
+        dev: ""
     },
     TODOIST_CLIENT_SECRET: {
-        prod: '',
-        dev: '',
+        prod: "",
+        dev: ""
     },
-
 
     /*
      * Trello OAuth app secrets (optional)
      * https://trello.com/app-key
      */
-    TRELLO_KEY: '',
-    TRELLO_SECRET: '',
-
+    TRELLO_KEY: "",
+    TRELLO_SECRET: "",
 
     /*
      * Wunderlist OAuth app secrets (optional)
      * https://developer.wunderlist.com/apps
      */
     WUNDERLIST_CLIENT_ID: {
-        dev: '',
-        prod: '',
+        dev: "",
+        prod: ""
     },
     WUNDERLIST_CLIENT_SECRET: {
-        dev: '',
-        prod: '',
-    },
+        dev: "",
+        prod: ""
+    }
 };
 /* eslint-enable no-useless-escape */
-
 
 // For now, I'm forcing it to use `dev` strings while testing, because I don't
 // have a "nicer" solution that do not involve massive amount of copy-pasting,
 // or massive amount of stubbing the tests
-function get_secret(name, mapping = SECRETS_MAPPING, secret_env = (env === 'test' ? 'dev' : env)) {
+function get_secret(name, mapping = SECRETS_MAPPING, secret_env = env === "test" ? "dev" : env) {
     const secret = _.get(mapping, name, null);
     if (!_.isNull(secret)) {
         if (_.isObject(secret)) {
@@ -205,7 +189,6 @@ function get_secret(name, mapping = SECRETS_MAPPING, secret_env = (env === 'test
     return null;
 }
 
-
 module.exports = {
-    get: get_secret,
+    get: get_secret
 };

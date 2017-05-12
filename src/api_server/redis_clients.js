@@ -4,9 +4,7 @@
  * Apache 2.0 Licensed
  */
 
-
-const Redis = require('ioredis');
-
+const Redis = require("ioredis");
 
 /**
  * Redis setup 1/2
@@ -16,7 +14,7 @@ const _redis_options = {
     db: 1,
 
     // Used to prevent it from connecting during tests
-    lazyConnect: true,
+    lazyConnect: true
 };
 
 // Need 2 clients because `pubsub_client` will be in 'subscriber mode',
@@ -43,11 +41,10 @@ else
 end
 `;
 
-main_client.defineCommand('shouldRefresh', {
+main_client.defineCommand("shouldRefresh", {
     numberOfKeys: 2,
-    lua: SHOULD_REFRESH_LUA_SCRIPT,
+    lua: SHOULD_REFRESH_LUA_SCRIPT
 });
-
 
 /**
  * Utils
@@ -57,12 +54,11 @@ function disconnect() {
     pubsub_client.disconnect();
 }
 
-
 /**
  * Exports
  */
 module.exports = {
     disconnect,
     main: main_client,
-    pubsub: pubsub_client,
+    pubsub: pubsub_client
 };

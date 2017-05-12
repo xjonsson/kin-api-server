@@ -4,12 +4,10 @@
  * Apache 2.0 Licensed
  */
 
+const log4js = require("log4js");
+const request = require("request-promise-native");
 
-const log4js = require('log4js');
-const request = require('request-promise-native');
-
-const env = require('./env');
-
+const env = require("./env");
 
 /*
  * host / ip that will be listened on
@@ -19,10 +17,9 @@ const env = require('./env');
  *  prod: <ip used to reach the server>
  */
 const API_HOST = {
-    dev: '',
-    prod: '',
+    dev: "",
+    prod: ""
 }[env];
-
 
 /*
  * Local port on which the app will listen on.
@@ -31,9 +28,8 @@ const API_HOST = {
  */
 const API_PORT = {
     dev: 0,
-    prod: 0,
+    prod: 0
 }[env];
-
 
 /*
  * Externally facing hostnames of your setup: API endpoint, static assets endpoint
@@ -41,49 +37,45 @@ const API_PORT = {
  * e.g: kin.today / static.kin.today
  */
 const API_HOSTNAME = {
-    dev: '',
-    prod: '',
+    dev: "",
+    prod: ""
 }[env];
 const STATIC_HOSTNAME = {
-    dev: '',
-    prod: '',
+    dev: "",
+    prod: ""
 }[env];
-
 
 const PROVIDER_NB_MONTHS_PAST = 6;
 const PROVIDER_NB_MONTHS_FUTURE = 12;
-
 
 /**
  * Logger setup
  */
 const log4js_options = {
-    appenders: [],
+    appenders: []
 };
-if (env !== 'test') {
+if (env !== "test") {
     log4js_options.appenders.push({
-        type: 'console',
+        type: "console",
         layout: {
-            type: 'pattern',
-            pattern: '%d %p %m',
-        },
+            type: "pattern",
+            pattern: "%d %p %m"
+        }
     });
     log4js_options.replaceConsole = true;
 }
 log4js.configure(log4js_options);
 const logger = log4js.getLogger();
 
-
 /**
  * Request setup
  */
 const rp = request.defaults({
     pool: {
-        maxSockets: Infinity,
+        maxSockets: Infinity
     },
-    gzip: true,
+    gzip: true
 });
-
 
 /**
  * Exports
@@ -98,5 +90,5 @@ module.exports = {
     PROVIDER_NB_MONTHS_FUTURE,
 
     logger,
-    rp,
+    rp
 };

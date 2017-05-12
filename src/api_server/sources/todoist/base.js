@@ -4,20 +4,17 @@
  * Apache 2.0 Licensed
  */
 
+const KinRequest = require("../kin_request");
 
-const KinRequest = require('../kin_request');
+const _ = require("lodash");
 
-const _ = require('lodash');
-
-
-const TODOIST_API_BASE_URL = 'https://todoist.com/API/v7/';
+const TODOIST_API_BASE_URL = "https://todoist.com/API/v7/";
 const TODOIST_API_TIMEOUT = 4 * 1000;
 const TODOIST_SCOPES = [
     // https://developer.todoist.com/#oauth
-    'data:read_write',
-    'data:delete',
+    "data:read_write",
+    "data:delete"
 ];
-
 
 class TodoistRequest extends KinRequest {
     constructor(req, source_id) {
@@ -25,7 +22,7 @@ class TodoistRequest extends KinRequest {
     }
 
     get source_name() {
-        return 'todoist';
+        return "todoist";
     }
 
     is_invalid_creds_error(err) {
@@ -33,14 +30,17 @@ class TodoistRequest extends KinRequest {
     }
 
     api_request_options(access_token, overrides) {
-        return _.merge({
-            method: 'POST',
-            form: {
-                token: access_token,
+        return _.merge(
+            {
+                method: "POST",
+                form: {
+                    token: access_token
+                },
+                json: true,
+                timeout: TODOIST_API_TIMEOUT
             },
-            json: true,
-            timeout: TODOIST_API_TIMEOUT,
-        }, overrides);
+            overrides
+        );
     }
 }
 
@@ -49,5 +49,5 @@ module.exports = {
     TODOIST_API_TIMEOUT,
     TODOIST_SCOPES,
 
-    TodoistRequest,
+    TodoistRequest
 };
