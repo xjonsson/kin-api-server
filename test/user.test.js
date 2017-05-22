@@ -32,6 +32,8 @@ const redis_client_stub = {
     hmset: sinon.stub().returns(bluebird.resolve()),
     hdel: sinon.stub().returns(bluebird.resolve()),
     hgetall: sinon.stub().returns(bluebird.resolve({})),
+    hset: sinon.stub().returns(bluebird.resolve({})),
+    del: sinon.stub().returns(bluebird.resolve()),
 };
 redis_client_stub.hgetall
     .withArgs('bk-1234:misc')
@@ -61,11 +63,17 @@ const User = proxyquire('../src/api_server/user', {
 
 describe('user', function () {
     beforeEach(function () {
-        this.user = new User('bk-1234', stub_user_misc);
+        this.user = new User('bk-1234', stub_user_misc, {
+            'kin-1234': {
+                id: 'kin-1234',
+            },
+        });
 
         redis_client_stub.hdel.resetHistory();
         redis_client_stub.hgetall.resetHistory();
         redis_client_stub.hmset.resetHistory();
+        redis_client_stub.hset.resetHistory();
+        redis_client_stub.del.resetHistory();
 
         // FIXME: Waiting on Sinon's fixing this issue:
         // https://github.com/sinonjs/sinon/issues/1361
@@ -80,7 +88,7 @@ describe('user', function () {
 
     describe('accessors', function () {
         describe('`id`', function () {
-            it('returns the id used when intantiating the user', function () {
+            it('returns the id used when instantiating the user', function () {
                 expect(this.user.id).to.equal('bk-1234');
             });
         });
@@ -256,14 +264,18 @@ describe('user', function () {
             });
 
             it('single source', function () {
-                this.user.add_source(this._source);
-                return _assert_added_source(this.user, this._source);
+                return this.user.add_source(this._source).then(() => {
+                    return _assert_added_source(this.user, this._source);
+                });
             });
 
             it('single source added multiple times (dedup)', function () {
-                this.user.add_source(this._source);
-                this.user.add_source(this._source);
-                return _assert_added_source(this.user, this._source);
+                return bluebird.all([
+                    this.user.add_source(this._source),
+                    this.user.add_source(this._source),
+                ]).then(() => {
+                    return _assert_added_source(this.user, this._source);
+                });
             });
         });
 
@@ -288,14 +300,18 @@ describe('user', function () {
             });
 
             it('single source', function () {
-                this.user.delete_source(this._source);
-                return _assert_deleted_source(this.user, this._source);
+                this.user.delete_source(this._source).then(() => {
+                    return _assert_deleted_source(this.user, this._source);
+                });
             });
 
             it('single source deleted multiple times (dedup)', function () {
-                this.user.delete_source(this._source);
-                this.user.delete_source(this._source);
-                return _assert_deleted_source(this.user, this._source);
+                return bluebird.all([
+                    this.user.delete_source(this._source),
+                    this.user.delete_source(this._source),
+                ]).then(() => {
+                    return _assert_deleted_source(this.user, this._source);
+                });
             });
         });
 
@@ -337,6 +353,77 @@ describe('user', function () {
                     expect(user.default_view).to.equal('agendaWeek');
                     expect(user.default_calendar_id).to.equal('testDefaultCalendarID');
                 });
+        });
+    });
+
+    describe('#create_alias', function () {
+        it('should persist new alias', function () {
+            User.create_alias('bk-1234', 'bk-5678');
+            expect(redis_client_stub.hset).to.have.been.calledWithExactly('bk-1234:misc', 'alias', 'bk-5678');
+        });
+    });
+
+    describe('#delete_alias', function () {
+        it('should delete all information relative to that alias', function () {
+            User.delete_alias('bk-1234');
+            expect(redis_client_stub.del).to.have.been.calledWithExactly('bk-1234:misc');
+        });
+    });
+
+    describe('#add_source', function () {
+        describe('with alias', function () {
+            beforeEach(function () {
+                redis_client_stub.hgetall.withArgs('alias-id:misc').returns(bluebird.resolve({
+                    alias: 'aliased-id',
+                }));
+            });
+
+            it('should throw `KinSourceAlreadyUsed` if the source is aliased to another user', function () {
+                return expect(this.user.add_source({
+                    id: 'alias-id',
+                }, true)).to.eventually.be.rejectedWith(errors.KinSourceAlreadyUsed);
+            });
+
+            it('should eventually be fulfilled if the source is aliasable', function () {
+                return expect(this.user.add_source({
+                    id: 'not-taken',
+                }, true)).to.eventually.be.fulfilled;
+            });
+        });
+
+        describe('without alias', function () {
+            it('should eventually be fulfilled', function () {
+                return expect(this.user.add_source({
+                    id: 'test',
+                })).to.eventually.be.fulfilled;
+            });
+        });
+    });
+
+    describe('#get_alias', function () {
+        beforeEach(function () {
+            // A is an alias-user for B
+            // B is a "real" user
+            // C is available
+            redis_client_stub.hgetall.withArgs('A:misc').returns(bluebird.resolve({
+                alias: 'B',
+            }));
+            redis_client_stub.hgetall.withArgs('B:misc').returns(bluebird.resolve({
+                id: 'B',
+            }));
+            redis_client_stub.hgetall.withArgs('C:misc').returns(bluebird.resolve({}));
+        });
+
+        it('should return the aliased user ID if called with an alias ID', function () {
+            return expect(User.get_alias('A')).to.eventually.equal('B');
+        });
+
+        it('should return the user ID if called with a real user ID', function () {
+            return expect(User.get_alias('B')).to.eventually.equal('B');
+        });
+
+        it('should return `null` if the ID is available', function () {
+            return expect(User.get_alias('C')).to.eventually.be.null;
         });
     });
 });

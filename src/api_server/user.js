@@ -57,10 +57,23 @@ class User {
     static get_alias(user_id) {
         return redis_clients.main
             .hgetall(_misc_key(user_id))
-            .then(misc => _.get(misc, "alias", user_id));
+            .then(misc => _.isEmpty(misc) ? null : _.get(misc, 'alias', user_id));
+    }
+
+    static create_alias(alias_id, aliased_id) {
+        return redis_clients.main
+            .hset(_misc_key(alias_id), 'alias', aliased_id);
+    }
+
+    static delete_alias(alias_id) {
+        return redis_clients.main.del(_misc_key(alias_id));
     }
 
     static load(user_id) {
+        if (!user_id) {
+            return bluebird.reject(new errors.KinUnauthenticatedUser());
+        }
+
         const promises = [
             redis_clients.main.hgetall(_misc_key(user_id)),
             redis_clients.main.hgetall(_sources_key(user_id)),
@@ -276,13 +289,43 @@ class User {
         });
     }
 
-    add_source(source) {
+    add_source(source, with_alias=false) {
+        if (!with_alias) {
+            return bluebird.resolve(this._add_source(source));
+        }
+
+        // FIXME: this is not transactionally safe
+        return User.get_alias(source.id)
+            .then(aliased_id => {
+                if (aliased_id === null || aliased_id === this.id) {
+                    // alias not found, or alias already set to current user
+                    this._add_source(source);
+                    return User.create_alias(source.id, this.id);
+                }
+                throw new errors.KinSourceAlreadyUsed(source.id);
+            });
+    }
+
+    _add_source(source) {
         this._added_sources_id.add(source.id);
         this._sources[source.id] = source;
         this._dirty = true;
     }
 
     delete_source(source) {
+        if (source.id === this.id) {
+            return bluebird.resolve(this._delete_source(source));
+        }
+
+        if (source.id in this._sources) {
+            return User.delete_alias(source.id)
+                .then(this._delete_source.bind(this, source));
+        }
+
+        return bluebird.reject(new errors.KinSourceNotFoundError(source.id));
+    }
+
+    _delete_source(source) {
         // TODO: we shoud probably delete the selected layers as well
         this._deleted_sources_id.add(source.id);
         delete this._sources[source.id];

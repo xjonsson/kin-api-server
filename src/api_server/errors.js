@@ -196,6 +196,27 @@ class KinRouteNotFound extends KinError {
     }
 }
 
+class KinSourceAlreadyUsed extends KinError {
+    constructor(source_id) {
+        super(`source \`${source_id}\` already used`);
+        this._source_id = source_id;
+    }
+
+    get status_code() {
+        return 400;
+    }
+
+    get code() {
+        return 100;
+    }
+
+    get params() {
+        return {
+            source_id: this._source_id
+        };
+    }
+}
+
 module.exports = {
     KinError,
     KinDisconnectedSourceError,
@@ -208,6 +229,7 @@ module.exports = {
     KinInvalidFormatError,
     KinTimeRangeEmptyError,
     KinLimitError,
-    KinRouteNotFound
+    KinRouteNotFound,
+    KinSourceAlreadyUsed
 };
 /* eslint-enable class-methods-use-this */
