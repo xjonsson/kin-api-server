@@ -22,7 +22,9 @@ function create_stubs() {
     const user = {
         id: 'kin-9876',
 
-        add_source() {},
+        add_source() {
+            return bluebird.resolve();
+        },
 
         get_source() {
             return source;

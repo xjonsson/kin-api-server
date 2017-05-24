@@ -75,7 +75,7 @@ class GoogleRequest extends KinRequest {
                 access_token: google_res.access_token,
                 status: "connected"
             });
-            this._user.add_source(this._source);
+            return this._user.add_source(this._source);
         });
     }
 

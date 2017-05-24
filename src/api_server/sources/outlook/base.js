@@ -64,7 +64,7 @@ class OutlookRequest extends KinRequest {
                 refresh_token: outlook_res.refresh_token,
                 status: "connected"
             });
-            this._user.add_source(this._source);
+            return this._user.add_source(this._source);
         });
     }
 

@@ -148,8 +148,10 @@ function prepare_request_stats(req, res, next) {
 
 function disconnect_source(req, source) {
     source.status = "disconnected"; // eslint-disable-line no-param-reassign
-    req.user.add_source(source);
-    throw new errors.KinDisconnectedSourceError(source.id);
+    return req.user.add_source(source)
+        .then(() => {
+            throw new errors.KinDisconnectedSourceError(source.id);
+        });
 }
 
 module.exports = {

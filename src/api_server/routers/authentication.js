@@ -72,7 +72,7 @@ function save_token(req, access_token, refresh_token, profile, done) {
         })
         .then(user => {
             req.user = user; // eslint-disable-line no-param-reassign
-            save_source(req, access_token, refresh_token, profile, done);
+            return save_source(req, access_token, refresh_token, profile, done);
         })
         .catch(err => {
             logger.error(`${req.id} \n ${err}`);

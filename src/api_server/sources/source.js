@@ -32,22 +32,21 @@ function save_source(req, access_token, refresh_token, profile, done) {
         access_token,
         refresh_token
     });
-    user.add_source(source);
 
-    const promises = [autoload_all_selected_layers(req, source)];
-    if (profile.provider === "google") {
-        promises.push(load_google_colors(req, source));
-    }
-
-    return bluebird
-        .all(promises)
+    return user
+        .add_source(source, true)
         .then(() => {
-            logger.debug("%s added source `%s` to user `%s`", req.id, source.id, user.id);
-            done(null, user);
+            const promises = [autoload_all_selected_layers(req, source)];
+            if (profile.provider === "google") {
+                promises.push(load_google_colors(req, source));
+            }
+
+            return bluebird.all(promises).then(() => {
+                logger.debug("%s added source `%s` to user `%s`", req.id, source.id, user.id);
+                done(null, user);
+            });
         })
-        .catch(err => {
-            done(err, null);
-        });
+        .catch(_.partialRight(done, null));
 }
 
 function send_home_redirects(req, res, next) {

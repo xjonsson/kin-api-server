@@ -88,10 +88,9 @@ class KinRequest {
             })
             .catch(err => {
                 if (this.is_invalid_creds_error(err)) {
-                    disconnect_source(this._req, this._source, err);
-                } else {
-                    throw err;
+                    return disconnect_source(this._req, this._source);
                 }
+                throw err;
             });
     }
 
@@ -102,13 +101,8 @@ class KinRequest {
                 return this.refresh_token()
                     .catch(err => {
                         logger.warn(`${this._req.id} failed to refresh token`);
-                        _.merge(this._source, {
-                            status: "connected" // TODO: other status?
-                        });
-                        this._user.add_source(this._source);
-                        return this._user.save().then(() => {
-                            throw err;
-                        });
+                        logger.error(`${this._req.id} `, err);
+                        return disconnect_source(this._req, this._source);
                     })
                     .then(this._user.save.bind(this._user));
             }
