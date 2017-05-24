@@ -139,12 +139,13 @@ router.get(
                 msg: `bad source id: \`${source_id}\``
             });
             next();
-        } else {
-            // TODO: need to ask the user to go to trello to revoke the app
-            deauth_source(req, source);
-            logger.debug("%s revoked source `%s` for user `%s`", req.id, source_id, user.id);
+            return;
         }
-        next();
+
+        // TODO: need to ask the user to go to trello to revoke the app
+        // NOTE: the `then` is here to make sure we're not passing anything
+        // to express `next` as it would be interpreted as an error.
+        deauth_source(req, source).then(() => next()).catch(next);
     },
     send_home_redirects
 );

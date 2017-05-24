@@ -12,11 +12,10 @@ const { load_google_colors } = require("./google/base");
 const bluebird = require("bluebird");
 const _ = require("lodash");
 
-function deauth_source(req, source) {
-    const user = req.user;
-    user.delete_source(source);
-    logger.debug("%s removed source `%s` from user `%s`", req.id, source.id, user.id);
-}
+const deauth_source = (req, source) =>
+    req.user.delete_source(source).then(() => {
+        logger.debug("%s removed source `%s` from user `%s`", req.id, source.id, req.user.id);
+    });
 
 function autoload_all_selected_layers(req, source) {
     const { provider_name } = split_source_id(source.id);

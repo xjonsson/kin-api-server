@@ -6,7 +6,6 @@
 
 const { FACEBOOK_SCOPES, FacebookRequest } = require("./base");
 const { deauth_source, save_source, send_home_redirects } = require("../source");
-const { logger } = require("../../config");
 const secrets = require("../../secrets");
 const {
     ensured_logged_in,
@@ -15,6 +14,7 @@ const {
     split_source_id
 } = require("../../utils");
 
+const bluebird = require("bluebird");
 const express = require("express");
 const FacebookStrategy = require("passport-facebook").Strategy;
 const passport = require("passport");
@@ -66,28 +66,25 @@ router.get(
                 msg: `bad source id: \`${source_id}\``
             });
             next();
-        } else {
-            const { provider_user_id } = split_source_id(source_id);
-            new FacebookRequest(req, source_id)
-                .api(
-                    `${provider_user_id}/permissions`,
-                {
-                    method: "DELETE"
-                },
-                    1
-                )
-                .then(() => {
-                    logger.debug(
-                        "%s revoked source `%s` for user `%s`",
-                        req.id,
-                        source_id,
-                        user.id
-                    );
-                })
-                .catch(next);
-            deauth_source(req, source);
-            next();
+            return;
         }
+
+        const { provider_user_id } = split_source_id(source_id);
+        bluebird
+            .all([
+                new FacebookRequest(req, source_id).api(
+                    `${provider_user_id}/permissions`,
+                    {
+                        method: "DELETE"
+                    },
+                    1
+                ),
+                deauth_source(req, source)
+            ])
+            // NOTE: the `then` is here to make sure we're not passing anything
+            // to express `next` as it would be interpreted as an error.
+            .then(() => next())
+            .catch(next);
     },
     send_home_redirects
 );

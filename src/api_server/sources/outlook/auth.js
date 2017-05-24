@@ -43,7 +43,9 @@ router.get("/connector", (req, res) => {
     });
     const code = connector_qs.code;
     delete connector_qs.code;
-    const url = `${get_static_url()}/connector.html?${querystring.stringify(connector_qs)}#code=${code}`;
+    const url = `${get_static_url()}/connector.html?${querystring.stringify(
+        connector_qs
+    )}#code=${code}`;
     logger.debug("%s outlook connector, redirecting to %s", req.id, url);
     res.redirect(url);
 });
@@ -77,12 +79,14 @@ router.get(
             res.status(404).json({
                 msg: `bad source id: \`${source_id}\``
             });
-        } else {
-            // TODO: need to ask the user to go to outlook to revoke the app
-            deauth_source(req, source);
-            logger.debug("%s revoked source `%s` for user `%s`", req.id, source_id, user.id);
+            next();
+            return;
         }
-        next();
+
+        // TODO: need to ask the user to go to outlook to revoke the app
+        // NOTE: the `then` is here to make sure we're not passing anything
+        // to express `next` as it would be interpreted as an error.
+        deauth_source(req, source).then(() => next()).catch(next);
     },
     send_home_redirects
 );

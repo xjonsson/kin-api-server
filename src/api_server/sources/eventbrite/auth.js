@@ -5,7 +5,6 @@
  */
 
 const { deauth_source, save_source, send_home_redirects } = require("../source");
-const { logger } = require("../../config");
 const secrets = require("../../secrets");
 const { ensured_logged_in, get_callback_url, get_static_url } = require("../../utils");
 
@@ -53,12 +52,14 @@ router.get(
             res.status(404).json({
                 msg: `bad source id: \`${source_id}\``
             });
-        } else {
-            // TODO: need to ask the user to go to eventbrite to revoke the app
-            deauth_source(req, source);
-            logger.debug("%s revoked source `%s` for user `%s`", req.id, source_id, user.id);
+            next();
+            return;
         }
-        next();
+
+        // TODO: need to ask the user to go to eventbrite to revoke the app
+        // NOTE: the `then` is here to make sure we're not passing anything
+        // to express `next` as it would be interpreted as an error.
+        deauth_source(req, source).then(() => next()).catch(next);
     },
     send_home_redirects
 );
