@@ -5,7 +5,12 @@
  */
 
 const { FACEBOOK_SCOPES, FacebookRequest } = require("./base");
-const { deauth_source, save_source, send_home_redirects } = require("../source");
+const {
+    deauth_source,
+    ensured_source_exists,
+    save_source,
+    send_home_redirects
+} = require("../source");
 const secrets = require("../../secrets");
 const {
     ensured_logged_in,
@@ -18,7 +23,6 @@ const bluebird = require("bluebird");
 const express = require("express");
 const FacebookStrategy = require("passport-facebook").Strategy;
 const passport = require("passport");
-const _ = require("lodash");
 
 const router = express.Router(); // eslint-disable-line new-cap
 const source_redirect_url = get_callback_url("facebook");
@@ -56,19 +60,10 @@ router.get(
 router.get(
     "/deauth/:source_id*",
     ensured_logged_in,
+    ensured_source_exists("source_id"),
     (req, res, next) => {
         const source_id = req.params.source_id;
-        const user = req.user;
-
-        const source = user.get_source(source_id);
-        if (_.isUndefined(source)) {
-            res.status(404).json({
-                msg: `bad source id: \`${source_id}\``
-            });
-            next();
-            return;
-        }
-
+        const source = req.user.get_source(source_id);
         const { provider_user_id } = split_source_id(source_id);
         bluebird
             .all([

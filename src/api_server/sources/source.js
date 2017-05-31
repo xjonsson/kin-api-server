@@ -4,6 +4,7 @@
  * Apache 2.0 Licensed
  */
 
+const errors = require("../errors");
 const { logger } = require("../config");
 const { create_source, get_static_url, get_ios_url, split_source_id } = require("../utils");
 const { load_layers_mapping } = require("./actions_mappings");
@@ -11,11 +12,6 @@ const { load_google_colors } = require("./google/base");
 
 const bluebird = require("bluebird");
 const _ = require("lodash");
-
-const deauth_source = (req, source) =>
-    req.user.delete_source(source).then(() => {
-        logger.debug("%s removed source `%s` from user `%s`", req.id, source.id, req.user.id);
-    });
 
 function autoload_all_selected_layers(req, source) {
     const { provider_name } = split_source_id(source.id);
@@ -25,6 +21,18 @@ function autoload_all_selected_layers(req, source) {
         });
     });
 }
+
+const deauth_source = (req, source) =>
+    req.user.delete_source(source).then(() => {
+        logger.debug("%s removed source `%s` from user `%s`", req.id, source.id, req.user.id);
+    });
+
+const ensured_source_exists = source_param_name => (req, res, next) =>
+    next(
+        _.isUndefined(req.user.get_source(req.params[source_param_name]))
+            ? new errors.KinSourceNotFoundError(req.params[source_param_name])
+            : null
+    );
 
 function save_source(req, access_token, refresh_token, profile, done) {
     const user = req.user;
@@ -66,8 +74,9 @@ function send_home_redirects(req, res, next) {
 }
 
 module.exports = {
-    deauth_source,
-    save_source,
     autoload_all_selected_layers,
+    deauth_source,
+    ensured_source_exists,
+    save_source,
     send_home_redirects
 };
