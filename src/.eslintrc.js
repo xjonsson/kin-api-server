@@ -1,8 +1,8 @@
 module.exports = {
-    extends: ['airbnb', 'prettier'],
+    extends: ["airbnb", "prettier"],
     parserOptions: {
         ecmaVersion: 6,
-        sourceType: 'module',
+        sourceType: "module",
         ecmaFeatures: {
             impliedStrict: true
         }
@@ -12,18 +12,18 @@ module.exports = {
     },
     rules: {
         camelcase: 0,
-        'no-underscore-dangle': 0,
-        indent: ['error', 4],
+        "no-underscore-dangle": 0,
+        indent: ["error", 4],
 
-        'new-cap': [
+        "new-cap": [
             2,
             {
-                capIsNewExceptions: ['JWTRedisSession']
+                capIsNewExceptions: ["JWTRedisSession"]
             }
         ],
-        'comma-dangle': 0,
-        'max-len': [
-            'error',
+        "comma-dangle": 0,
+        "max-len": [
+            "error",
             100,
             2,
             {
@@ -33,10 +33,10 @@ module.exports = {
                 ignoreTemplateLiterals: true
             }
         ],
-        'class-methods-use-this': 0,
-        'no-bitwise': 0,
+        "class-methods-use-this": 0,
+        "no-bitwise": 0,
 
         // Both styles are awesome ;)
-        'arrow-body-style': 0
+        "arrow-body-style": 0
     }
 };
