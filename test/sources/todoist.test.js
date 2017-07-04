@@ -271,6 +271,52 @@ describe('Todoist', function () {
                     sync_type: 'incremental',
                 });
             });
+            it('formats dates by timezone', function () {
+                this.stubs.req.query.sync_token = 'superAwesomeSyncToken';
+                const layer_id = 'kin-1234:1234';
+                nock(TODOIST_API_BASE_URL)
+                    .post('/sync')
+                    .reply(200, {
+                        user: {
+                            tz_info: {
+                                timezone: 'America/Toronto',
+                            },
+                        },
+                        items: [
+                            {
+                                all_day: true,
+                                content: 'Alpha',
+                                due_date_utc: 'Mon 10 Oct 2016 03:59:00 +0000',
+                                id: 112233,
+                                project_id: 1234,
+                                in_history: 0,
+                            },
+                        ],
+                        sync_token: 'nextSuperAwesomeSyncToken',
+                    });
+
+                return expect(todoist_actions.load_events(
+                    this.stubs.req, this.stubs.source, layer_id)  // eslint-disable-line comma-dangle
+                ).to.eventually.deep.equal({
+                    events: [
+                        {
+                            id: 'kin-1234:1234:112233',
+                            title: 'Alpha',
+                            kind: 'event#basic',
+                            start: {
+                                date: '2016-10-09',
+                            },
+                            end: {
+                                date: '2016-10-10',
+                            },
+                            link: 'https://en.todoist.com/app#project%2F1234',
+                            status: 'confirmed',
+                        },
+                    ],
+                    next_sync_token: 'nextSuperAwesomeSyncToken',
+                    sync_type: 'incremental',
+                });
+            });
         });
 
         describe('#patch_event', function () {

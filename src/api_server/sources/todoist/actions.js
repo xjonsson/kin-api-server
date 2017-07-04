@@ -70,7 +70,7 @@ function _format_layer(source_id, todoist_project) {
     return output;
 }
 
-function _format_event(layer_id, todoist_item) {
+function _format_event(layer_id, todoist_tz, todoist_item) {
     const [, todoist_project_id] = split_merged_id(layer_id);
 
     const output = {
@@ -90,7 +90,7 @@ function _format_event(layer_id, todoist_item) {
         todoist_item.due_date_utc,
         TODOIST_DATE_TIME_FORMAT,
         true,
-        "UTC"
+        todoist_tz
     );
 
     // FIXME: `all_day` is in all responses sent by Todoist now, but it's not documented
@@ -192,11 +192,13 @@ function _load_events(req, source, layer_id, sync_token = TODOIST_FULL_SYNC_TOKE
 
     return new TodoistRequest(req, source.id).api("sync", request_options).then(todoist_res => {
         const parsed_todoist_project_id = parseInt(todoist_project_id, 10);
+        const todoist_tz = _.get(todoist_res, "user.tz_info.timezone", "UTC");
+
         events_res.events = _(todoist_res.items)
             .filter(item => {
                 return item.project_id === parsed_todoist_project_id && !_.isNil(item.due_date_utc);
             })
-            .map(_.partial(_format_event, layer_id))
+            .map(_.partial(_format_event, layer_id, todoist_tz))
             .value();
         events_res.next_sync_token = todoist_res.sync_token;
         return events_res;
@@ -230,7 +232,8 @@ function patch_event(req, source, event_id, event_patch) {
     return new TodoistRequest(req, source.id).api("sync", query_options).then(todoist_res => {
         const parsed_todoist_item_id = parseInt(todoist_item_id, 10);
         const todoist_item = _.find(todoist_res.items, { id: parsed_todoist_item_id });
-        return _format_event(merge_ids(source_id, todoist_project_id), todoist_item);
+        const todoist_tz = _.get(todoist_res, "user.tz_info.timezone", "UTC");
+        return _format_event(merge_ids(source_id, todoist_project_id), todoist_tz, todoist_item);
     });
 }
 
@@ -260,7 +263,8 @@ function create_event(req, source, layer_id, event_patch) {
         const todoist_item_id = _.get(todoist_res, ["temp_id_mapping", item_temp_id]);
         const parsed_todoist_item_id = parseInt(todoist_item_id, 10);
         const todoist_item = _.find(todoist_res.items, { id: parsed_todoist_item_id });
-        return _format_event(layer_id, todoist_item);
+        const todoist_tz = _.get(todoist_res, "user.tz_info.timezone", "UTC");
+        return _format_event(layer_id, todoist_tz, todoist_item);
     });
 }
 
