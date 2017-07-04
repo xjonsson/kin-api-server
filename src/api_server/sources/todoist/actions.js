@@ -180,7 +180,7 @@ function _load_events(req, source, layer_id, sync_token = TODOIST_FULL_SYNC_TOKE
     const [, todoist_project_id] = split_merged_id(layer_id);
     const request_options = {
         form: {
-            resource_types: JSON.stringify(["items"]),
+            resource_types: JSON.stringify(["items", "user"]),
             sync_token
         }
     };
@@ -216,7 +216,7 @@ function patch_event(req, source, event_id, event_patch) {
     const query_options = {
         form: {
             // TODO: we shouldn't do a full-resync each time we update something ;)
-            resource_types: JSON.stringify(["items"]),
+            resource_types: JSON.stringify(["items", "user"]),
             sync_token: "*",
             commands: JSON.stringify([
                 {
@@ -245,7 +245,7 @@ function create_event(req, source, layer_id, event_patch) {
     const query_options = {
         form: {
             // TODO: we shouldn't do a full-resync each time we update something ;)
-            resource_types: JSON.stringify(["items"]),
+            resource_types: JSON.stringify(["items", "user"]),
             sync_token: "*",
             commands: JSON.stringify([
                 {

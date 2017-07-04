@@ -356,7 +356,7 @@ describe('Todoist', function () {
                 const event_patch = {};
                 const expected_body = {
                     token: 'youShallPassAccessToken',
-                    resource_types: JSON.stringify(['items']),
+                    resource_types: JSON.stringify(['items', 'user']),
                     sync_token: '*',
                     commands: JSON.stringify([
                         {
@@ -397,7 +397,7 @@ describe('Todoist', function () {
 
                 const expected_body = {
                     token: 'youShallPassAccessToken',
-                    resource_types: JSON.stringify(['items']),
+                    resource_types: JSON.stringify(['items', 'user']),
                     sync_token: '*',
                     commands: JSON.stringify([
                         {
@@ -436,7 +436,7 @@ describe('Todoist', function () {
 
                 const expected_body = {
                     token: 'youShallPassAccessToken',
-                    resource_types: JSON.stringify(['items']),
+                    resource_types: JSON.stringify(['items', 'user']),
                     sync_token: '*',
                     commands: JSON.stringify([
                         {
