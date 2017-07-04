@@ -83,9 +83,6 @@ function _format_event(layer_id, todoist_tz, todoist_item) {
         link: `https://en.todoist.com/app#project%2F${todoist_project_id}`
     };
 
-    // https://developer.todoist.com/#items
-    // Input: Mon 07 Aug 2006 12:34:56 +0000
-    // Format String: ddd
     const parsed_due_date = moment.tz(
         todoist_item.due_date_utc,
         TODOIST_DATE_TIME_FORMAT,
@@ -104,11 +101,14 @@ function _format_event(layer_id, todoist_tz, todoist_item) {
             date: parsed_due_date.add(1, "day").format(DATE_FORMAT)
         };
     } else {
+        // NOTE: converstion to UTC before formatting isn't mandatory as we're
+        // formatting with the TZ offset (`ZZ` in the format string), the idea
+        // is to use UTC as much as possible in Kin's API
         output.start = {
-            date_time: parsed_due_date.format(DATE_TIME_FORMAT)
+            date_time: parsed_due_date.tz("UTC").format(DATE_TIME_FORMAT)
         };
         output.end = {
-            date_time: parsed_due_date.add(1, "hour").format(DATE_TIME_FORMAT)
+            date_time: parsed_due_date.add(1, "hour").tz("UTC").format(DATE_TIME_FORMAT)
         };
     }
 
@@ -117,14 +117,13 @@ function _format_event(layer_id, todoist_tz, todoist_item) {
     return output;
 }
 
-function _format_patch(event_patch) {
+function _format_patch(event_patch, timezone) {
     const output = {
         content: event_patch.title
     };
 
     if (!_.isEmpty(event_patch.start)) {
         let parsed_start = null;
-        let all_day = false;
 
         const date_time = _.get(event_patch, ["start", "date_time"], null);
         if (!_.isNull(date_time)) {
@@ -139,8 +138,18 @@ function _format_patch(event_patch) {
         } else {
             const date = _.get(event_patch, ["start", "date"], null);
             if (!_.isNull(date)) {
-                parsed_start = moment.tz(date, DATE_FORMAT, true, "utc");
-                all_day = true;
+                // NOTE: Todoist expects `due_date_utc` to be in UTC but its default
+                // behavior (for existing dates AND setting new dates) is to use
+                // midnight (-1s) relative to its users' timezone:
+                //
+                // User in Europe/Paris sets a date of `2017-07-10`:
+                // Todoist sets (and consequently expects us) `due_date_utc` to
+                // `2017-07-10T21:59:59Z` -> `2017-07-10T21:59:59+02:00`
+                //
+                // User in US/Hawaii sets a date of `2017-07-10`:
+                // Todoist sets (and consequently expects us) `due_date_utc` to
+                // `2017-07-11T09:59:59Z` -> `2017-07-10T21:59:59-10:00`
+                parsed_start = moment.tz(date, DATE_FORMAT, true, timezone).endOf("day").tz("UTC");
                 if (!parsed_start.isValid()) {
                     throw new errors.KinInvalidFormatError(date, "start.date", DATE_FORMAT);
                 }
@@ -148,14 +157,7 @@ function _format_patch(event_patch) {
         }
 
         if (!_.isNull(parsed_start)) {
-            if (all_day) {
-                output.due_date_utc = `${parsed_start.format("YYYY-MM-DD")}T23:59:59`;
-            } else {
-                output.due_date_utc = parsed_start.format("YYYY-MM-DDTHH:mm");
-            }
-
-            // It seems I can put anything, as long as it's "set", due_date_utc will be used
-            output.date_string = "today";
+            output.due_date_utc = parsed_start.format("YYYY-MM-DDTHH:mm:ss");
         }
     }
     return output;
@@ -211,7 +213,7 @@ function load_events(req, source, layer_id) {
 
 function patch_event(req, source, event_id, event_patch) {
     const [source_id, todoist_project_id, todoist_item_id] = split_merged_id(event_id);
-    const formatted_patch = _format_patch(event_patch);
+    const formatted_patch = _format_patch(event_patch, req.user.timezone);
 
     const query_options = {
         form: {
@@ -229,6 +231,7 @@ function patch_event(req, source, event_id, event_patch) {
             ])
         }
     };
+
     return new TodoistRequest(req, source.id).api("sync", query_options).then(todoist_res => {
         const parsed_todoist_item_id = parseInt(todoist_item_id, 10);
         const todoist_item = _.find(todoist_res.items, { id: parsed_todoist_item_id });

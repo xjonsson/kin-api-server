@@ -36,6 +36,7 @@ function create_stubs() {
 
         save: sinon.stub().returns(bluebird.resolve()),
         should_refresh: sinon.stub().returns(bluebird.resolve(0)),
+        timezone: 'Europe/Paris',
     };
 
     const req = {

@@ -274,29 +274,27 @@ describe('Todoist', function () {
             it('formats dates by timezone', function () {
                 this.stubs.req.query.sync_token = 'superAwesomeSyncToken';
                 const layer_id = 'kin-1234:1234';
-                nock(TODOIST_API_BASE_URL)
-                    .post('/sync')
-                    .reply(200, {
-                        user: {
-                            tz_info: {
-                                timezone: 'America/Toronto',
-                            },
+                nock(TODOIST_API_BASE_URL).post('/sync').reply(200, {
+                    user: {
+                        tz_info: {
+                            timezone: 'America/Toronto',
                         },
-                        items: [
-                            {
-                                all_day: true,
-                                content: 'Alpha',
-                                due_date_utc: 'Mon 10 Oct 2016 03:59:00 +0000',
-                                id: 112233,
-                                project_id: 1234,
-                                in_history: 0,
-                            },
-                        ],
-                        sync_token: 'nextSuperAwesomeSyncToken',
-                    });
+                    },
+                    items: [
+                        {
+                            all_day: true,
+                            content: 'Alpha',
+                            due_date_utc: 'Mon 10 Oct 2016 03:59:00 +0000',
+                            id: 112233,
+                            project_id: 1234,
+                            in_history: 0,
+                        },
+                    ],
+                    sync_token: 'nextSuperAwesomeSyncToken',
+                });
 
-                return expect(todoist_actions.load_events(
-                    this.stubs.req, this.stubs.source, layer_id)  // eslint-disable-line comma-dangle
+                return expect(
+                    todoist_actions.load_events(this.stubs.req, this.stubs.source, layer_id) // eslint-disable-line comma-dangle
                 ).to.eventually.deep.equal({
                     events: [
                         {
@@ -404,14 +402,13 @@ describe('Todoist', function () {
                             type: 'item_update',
                             uuid: '#RealStringsHaveEntropy',
                             args: {
-                                due_date_utc: '2016-10-12T23:59:59',
-                                date_string: 'today',
+                                due_date_utc: '2016-10-12T21:59:59',
                                 id: '112233',
                             },
                         },
                     ]),
                 };
-                this.stub_reply.items[0].due_date_utc = 'Wed 12 Oct 2016 00:00:00 +0000';
+                this.stub_reply.items[0].due_date_utc = 'Wed 12 Oct 2016 11:59:59 +0000';
 
                 nock(TODOIST_API_BASE_URL)
                     .post('/sync', expected_body)
@@ -443,8 +440,7 @@ describe('Todoist', function () {
                             type: 'item_update',
                             uuid: '#RealStringsHaveEntropy',
                             args: {
-                                due_date_utc: '2016-10-12T00:00',
-                                date_string: 'today',
+                                due_date_utc: '2016-10-12T00:00:00',
                                 id: '112233',
                             },
                         },
