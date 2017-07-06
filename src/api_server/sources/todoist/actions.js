@@ -242,7 +242,7 @@ function patch_event(req, source, event_id, event_patch) {
 
 function create_event(req, source, layer_id, event_patch) {
     const [, todoist_project_id] = split_merged_id(layer_id);
-    const formatted_patch = _format_patch(event_patch);
+    const formatted_patch = _format_patch(event_patch, req.user.timezone);
 
     const item_temp_id = cuid();
     const query_options = {
