@@ -4,16 +4,17 @@
  * Apache 2.0 Licensed
  */
 
+const _ = require("lodash");
 
-const _ = require('lodash');
-
-
-const env = _.get({
-    dev: 'dev',
-    preprod: 'preprod',
-    production: 'prod',
-    test: 'test',
-}, process.env.NODE_ENV, 'dev');
-
+const env = _.get(
+    {
+        dev: "dev",
+        preprod: "preprod",
+        production: "prod",
+        test: "test"
+    },
+    process.env.NODE_ENV,
+    "dev"
+);
 
 module.exports = env;

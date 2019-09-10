@@ -66,6 +66,7 @@ gulp.task('lint', () => {
     ])
         .pipe(eslint())
         .pipe(eslint.format())
+        .pipe(eslint.failAfterError());
 });
 
 gulp.task('watch', ['lint', 'graceful-reload'], () => {

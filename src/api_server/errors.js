@@ -4,21 +4,25 @@
  * Apache 2.0 Licensed
  */
 
-
 /* eslint-disable class-methods-use-this */
 class KinError extends Error {
-    get status_code() { return 500; }
-    get code() { return 10; }
-    get params() { return {}; }
+    get status_code() {
+        return 500;
+    }
+    get code() {
+        return 10;
+    }
+    get params() {
+        return {};
+    }
     get json() {
         return {
             code: this.code,
             error: this.message,
-            params: this.params,
+            params: this.params
         };
     }
 }
-
 
 class KinDisconnectedSourceError extends KinError {
     constructor(source_id) {
@@ -27,15 +31,18 @@ class KinDisconnectedSourceError extends KinError {
         this._source_id = source_id;
     }
 
-    get status_code() { return 400; }
-    get code() { return 20; }
+    get status_code() {
+        return 400;
+    }
+    get code() {
+        return 20;
+    }
     get params() {
         return {
-            source_id: this._source_id,
+            source_id: this._source_id
         };
     }
 }
-
 
 class KinActionNotSupportedError extends KinError {
     constructor(action, provider_name) {
@@ -43,10 +50,13 @@ class KinActionNotSupportedError extends KinError {
         this.name = this.constructor.name;
     }
 
-    get status_code() { return 400; }
-    get code() { return 30; }
+    get status_code() {
+        return 400;
+    }
+    get code() {
+        return 30;
+    }
 }
-
 
 class KinSourceNotFoundError extends KinError {
     constructor(source_id) {
@@ -55,48 +65,60 @@ class KinSourceNotFoundError extends KinError {
         this._source_id = source_id;
     }
 
-    get status_code() { return 404; }
-    get code() { return 40; }
+    get status_code() {
+        return 404;
+    }
+    get code() {
+        return 40;
+    }
     get params() {
         return {
-            source_id: this._source_id,
+            source_id: this._source_id
         };
     }
 }
 
-
 class KinUnauthenticatedUser extends KinError {
     constructor() {
-        super('user not authenticated');
+        super("user not authenticated");
         this.name = this.constructor.name;
     }
 
-    get status_code() { return 401; }
-    get code() { return 50; }
+    get status_code() {
+        return 401;
+    }
+    get code() {
+        return 50;
+    }
 }
-
 
 class KinUserNoPlan extends KinError {
     constructor() {
-        super('user has no plan');
+        super("user has no plan");
         this.name = this.constructor.name;
     }
 
-    get status_code() { return 403; }
-    get code() { return 60; }
+    get status_code() {
+        return 403;
+    }
+    get code() {
+        return 60;
+    }
 }
-
 
 class KinUserExpiredPlan extends KinError {
     constructor() {
-        super('user\'s plan has expired');
+        super("user's plan has expired");
         this.name = this.constructor.name;
     }
 
-    get status_code() { return 403; }
-    get code() { return 70; }
+    get status_code() {
+        return 403;
+    }
+    get code() {
+        return 70;
+    }
 }
-
 
 class KinInvalidFormatError extends KinError {
     constructor(value, field, format) {
@@ -104,10 +126,13 @@ class KinInvalidFormatError extends KinError {
         this.name = this.constructor.name;
     }
 
-    get status_code() { return 400; }
-    get code() { return 60; }
+    get status_code() {
+        return 400;
+    }
+    get code() {
+        return 60;
+    }
 }
-
 
 class KinTimeRangeEmptyError extends KinError {
     constructor(start, end) {
@@ -115,10 +140,13 @@ class KinTimeRangeEmptyError extends KinError {
         this.name = this.constructor.name;
     }
 
-    get status_code() { return 400; }
-    get code() { return 70; }
+    get status_code() {
+        return 400;
+    }
+    get code() {
+        return 70;
+    }
 }
-
 
 class KinLimitError extends KinError {
     constructor(field, limit) {
@@ -126,8 +154,12 @@ class KinLimitError extends KinError {
         this.name = this.constructor.name;
     }
 
-    get status_code() { return 400; }
-    get code() { return 80; }
+    get status_code() {
+        return 400;
+    }
+    get code() {
+        return 80;
+    }
 }
 
 class KinLayerNotFoundError extends KinError {
@@ -137,15 +169,53 @@ class KinLayerNotFoundError extends KinError {
         this._layer_id = layer_id;
     }
 
-    get status_code() { return 404; }
-    get code() { return 90; }
+    get status_code() {
+        return 404;
+    }
+    get code() {
+        return 90;
+    }
     get params() {
         return {
-            layer_id: this._layer_id,
+            layer_id: this._layer_id
         };
     }
 }
 
+class KinRouteNotFound extends KinError {
+    constructor() {
+        super("route not found");
+        this.name = this.constructor.name;
+    }
+
+    get status_code() {
+        return 404;
+    }
+    get code() {
+        return 100;
+    }
+}
+
+class KinSourceAlreadyUsed extends KinError {
+    constructor(source_id) {
+        super(`source \`${source_id}\` already used`);
+        this._source_id = source_id;
+    }
+
+    get status_code() {
+        return 400;
+    }
+
+    get code() {
+        return 100;
+    }
+
+    get params() {
+        return {
+            source_id: this._source_id
+        };
+    }
+}
 
 module.exports = {
     KinError,
@@ -159,5 +229,7 @@ module.exports = {
     KinInvalidFormatError,
     KinTimeRangeEmptyError,
     KinLimitError,
+    KinRouteNotFound,
+    KinSourceAlreadyUsed
 };
 /* eslint-enable class-methods-use-this */
